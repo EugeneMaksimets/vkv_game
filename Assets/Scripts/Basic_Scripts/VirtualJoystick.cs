@@ -15,7 +15,7 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     // 0 - Центр, 1 - Клик, 2 - Вправо, 3 - Влево, 4 - Верх, 5 - Вниз 
     [SerializeField] private Sprite[] _joystickSprites; 
     
-    void Start()
+    void Awake()
     {
         _joystickImage = GetComponent<Image>();
         _rectTransform = GetComponent<RectTransform>();
@@ -47,64 +47,6 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
             _playerMovement.StandUp();
         }
     }
-//    private void HandleJoystick(Vector2 screenPosition, Camera cam)
-//     {
-//         Vector2 localPoint;
-//         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, screenPosition, cam, out localPoint))
-//         {
-//             float x = localPoint.x;
-//             float y = localPoint.y;
-
-//             // Проверяем мертвую зону (если палец близко к центру)
-//             if (Mathf.Abs(x) < _deadZone && Mathf.Abs(y) < _deadZone)
-//             {
-//                 _inputVector = Vector2.zero;
-//                 if (_joystickSprites.Length > 0 && _joystickSprites[0] != null)
-//                     _joystickImage.sprite = _joystickSprites[0];
-
-//                 // Если вернулись в центр — встаем из приседа
-//                 if (_playerMovement != null) _playerMovement.StandUp();
-//             }
-//             else
-//             {
-//                 // Определяем направление по горизонтали для движения
-//                 if (x < -_deadZone)
-//                 {
-//                     _inputVector = new Vector2(-1f, 0f);
-//                     // Если спрайт влево задан под индексом 3 
-//                     if (_joystickSprites.Length > 3 && _joystickSprites[3] != null) 
-//                         _joystickImage.sprite = _joystickSprites[3];
-//                 }
-//                 else if (x > _deadZone)
-//                 {
-//                     _inputVector = new Vector2(1f, 0f);
-//                     // Если спрайт вправо задан под индексом 4 
-//                     if (_joystickSprites.Length > 4 && _joystickSprites[4] != null) 
-//                         _joystickImage.sprite = _joystickSprites[4];
-//                 }
-
-//                 // Проверяем вертикаль (Прыжок вверх или Приседание вниз)
-//                 if (y > _deadZone)
-//                 {
-//                     // Jump
-//                     if (_playerMovement != null) _playerMovement.Jump();
-//                     // Если спрайт вверх задан под индексом 2
-//                     if (_joystickSprites.Length > 2 && _joystickSprites[2] != null) 
-//                         _joystickImage.sprite = _joystickSprites[2];
-//                 }
-//                 else if (y < -_deadZone)
-//                 {
-//                     // Палец потянули вниз -> Приседание
-//                     if (_playerMovement != null) _playerMovement.Crouch();
-//                     // Спрайт низа (если добавлен в массив под индексом 5)
-//                     if (_joystickSprites.Length > 5 && _joystickSprites[5] != null) 
-//                         _joystickImage.sprite = _joystickSprites[5];
-//                 }
-//             }
-
-//             ApplyInput();
-//         }
-//     }
 
 private void HandleJoystick(Vector2 screenPosition, Camera cam)
     {

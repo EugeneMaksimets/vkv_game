@@ -1,29 +1,31 @@
-// using UnityEngine;
+using UnityEngine;
 
-// public class PlayerRunState : IPlayerState
-// {
-//     private PlayerMovement _player;
+public class PlayerRunState : IPlayerState
+{
+    private PlayerMovement _player;
 
-//     public PlayerRunState(PlayerMovement player)
-//     {
-//         _player = player;
-//     }
+    public PlayerRunState(PlayerMovement player)
+    {
+        _player = player;
+    }
 
-//     public void Enter() { }
+    public void Enter() { }
 
-//     public void UpdateState()
-//     {
-//         _player.Animator.SetFloat("Speed", Mathf.Abs(_player.HorizontalInput));
+    public void UpdateState()
+    {
+        // Передаем текущую скорость в аниматор (абсолютное значение ввода)
+        _player.Animator.SetFloat("Speed", Mathf.Abs(_player.HorizontalInput));
 
-//         // Если остановились — возвращаемся в Idle
-//         if (Mathf.Abs(_player.HorizontalInput) < 0.1f)
-//         {
-//             _player.StateMachine.ChangeState(_player.IdleState);
-//         }
-//     }
+        // Если ввод прекратился (вернулся к 0) — возвращаемся в Idle
+        if (Mathf.Abs(_player.HorizontalInput) < 0.1f)
+        {
+            _player.StateMachine.ChangeState(_player.IdleState);
+        }
+    }
 
-//     public void Exit()
-//     {
-//         _player.Animator.SetFloat("Speed", 0f);
-//     }
-// }
+    public void Exit()
+    {
+        // При выходе из бега обнуляем скорость в аниматоре
+        _player.Animator.SetFloat("Speed", 0f);
+    }
+}

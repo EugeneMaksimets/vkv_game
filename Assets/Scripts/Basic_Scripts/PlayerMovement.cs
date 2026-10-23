@@ -17,99 +17,94 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Level Bounds")]
     [SerializeField] private bool _useLevelBounds = true;
-    [SerializeField] private float _minX = -10f; // Minimum X position for the player
-    [SerializeField] private float _maxX = 15f; // Maximum X position for the player
+    [SerializeField] private float _minX = -10f;
+    [SerializeField] private float _maxX = 15f;
 
-    private float _horizontalInput;
-    private Rigidbody2D _rb;
-    private BoxCollider2D _collider;
-    private Animator _animator;
+    // Свойства для доступа из состояний
+    public Rigidbody2D Rb { get; private set; }
+    public Animator Animator { get; private set; }
+    public BoxCollider2D Collider { get; private set; }
+    public float HorizontalInput { get; private set; }
+    public bool IsGrounded { get; private set; }
+    public float JumpForce => _jumpForce;
 
-    private Vector3 _originalScale; // Сохраняем исходный размер персонажа
-    private Vector2 _originalColliderSize;
-    private Vector2 _originalColliderOffset;
+    private Vector3 _originalScale;
+    public Vector2 OriginalColliderSize { get; private set; }
+    public Vector2 OriginalColliderOffset { get; private set; }
 
-    private bool _isGrounded;
-    private bool _isCrouching;
     private bool _isJoystickActive = false;
-    // Геттер и сеттер в виде стрелочных функций
     public bool IsJoystickActive 
     { 
         get => _isJoystickActive; 
         set => _isJoystickActive = value; 
     }
-     
 
+    // State Machine и ссылки на состояния
+    public PlayerStateMachine StateMachine { get; private set; }
+    public PlayerIdleState IdleState { get; private set; }
+    public PlayerRunState RunState { get; private set; }
+    public PlayerJumpState JumpState { get; private set; }
+    public PlayerCrouchState CrouchState { get; private set; }
+
+    void Awake() {
+        Rb = GetComponent<Rigidbody2D>();
+        Animator = GetComponent<Animator>();
+        Collider = GetComponent<BoxCollider2D>();
+
+        // Инициализируем State Machine
+        StateMachine = new PlayerStateMachine();
+        IdleState = new PlayerIdleState(this);
+        RunState = new PlayerRunState(this);
+        JumpState = new PlayerJumpState(this);
+        CrouchState = new PlayerCrouchState(this);
+    }
     void Start()
     {
-        _rb = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
-        _collider = GetComponent<BoxCollider2D>();
-        
         _originalScale = transform.localScale;
-        _originalColliderSize = _collider.size;
-        _originalColliderOffset = _collider.offset;
+        OriginalColliderSize = Collider.size;
+        OriginalColliderOffset = Collider.offset;
+
+        // Стартуем в состоянии покоя
+        StateMachine.Initialize(IdleState);
     }
 
     void Update()
     {
-        // Проверяем, касается ли круг под ногами слоя земли
+        // 1. Проверяем землю
         if (_groundCheck != null)
         {
-            _isGrounded = Physics2D.OverlapCircle(_groundCheck.position, _groundCheckRadius, _groundLayer);
-
+            IsGrounded = Physics2D.OverlapCircle(_groundCheck.position, _groundCheckRadius, _groundLayer);
+            Animator.SetBool("IsGrounded", IsGrounded);
         }
 
-        // 1. Проверяем клавиатуру (если игрок жмет клавиши на ПК)
+        // 2. Считываем клавиатуру (если не активен джойстик)
         if (Keyboard.current != null && !_isJoystickActive)
         {
-            // Проверяем, нажата ли какая-то из клавиш движения вправо
             bool isRightPressed = Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed;
-            // Проверяем, нажата ли какая-то из клавиш движения влево
             bool isLeftPressed = Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed;
-            // Проверяем, нажата ли клавиша прыжка
             bool isJumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
             bool isCrouchPressed = Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed;
             bool isStandUp = Keyboard.current.sKey.wasReleasedThisFrame || Keyboard.current.downArrowKey.wasReleasedThisFrame;
 
-            if (isRightPressed)
-            {
-                SetMoveRight();
-            }
-            else if (isLeftPressed)
-            {
-                SetMoveLeft();
-            }
-            else
-            {
-                StopMoving();
-            }
-            if (isJumpPressed && _isGrounded)
-            {
-                Jump();
-            }
-            if (isCrouchPressed && _isGrounded)
-            {
-                Crouch();
-            }
-            else if (isStandUp)
-            {
-                StandUp();
-            }
+            if (isRightPressed) SetMoveRight();
+            else if (isLeftPressed) SetMoveLeft();
+            else StopMoving();
 
+            if (isJumpPressed) Jump();
 
-        } 
+            if (isCrouchPressed) Crouch();
+            else if (isStandUp) StandUp();
+        }
 
+        // 3. Обновляем логику текущего состояния State Machine
+        StateMachine.Update();
 
-        // Передаем абсолютное значение ввода (от 0 до 1) в Animator в параметр "Speed"
-        _animator.SetFloat("Speed", Mathf.Abs(_horizontalInput));
-
-        // Поворот спрайта с сохранением твоего размера (например, 1.2)
-        if (_horizontalInput > 0)
+        // 4. Поворот спрайта
+        if (HorizontalInput > 0)
         {
             transform.localScale = new Vector3(Mathf.Abs(_originalScale.x), _originalScale.y, _originalScale.z);
         }
-        else if (_horizontalInput < 0)
+        else if (HorizontalInput < 0)
         {
             transform.localScale = new Vector3(-Mathf.Abs(_originalScale.x), _originalScale.y, _originalScale.z);
         }
@@ -117,10 +112,11 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Move the player based
-        _rb.linearVelocity = new Vector2(_horizontalInput * _moveSpeed, _rb.linearVelocity.y);
+        // Скорость передвижения снижается в два раза, если мы сидим
+        float currentSpeed = (StateMachine.CurrentState == CrouchState) ? _moveSpeed * 0.5f : _moveSpeed;
+        Rb.linearVelocity = new Vector2(HorizontalInput * currentSpeed, Rb.linearVelocity.y);
 
-        // Clamp the player's position within the level bounds if enabled
+        // Ограничения уровня
         if (_useLevelBounds)
         {
             float clampedX = Mathf.Clamp(transform.position.x, _minX, _maxX);
@@ -128,51 +124,39 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void SetMoveRight()
-    {
-        _horizontalInput = 1f;
-    }
-
-    public void SetMoveLeft()
-    {
-        _horizontalInput = -1f;
-    }
-
-    public void StopMoving()
-    {
-        _horizontalInput = 0f;
-    }
+    // Методы управления вводом (вызываются с клавиатуры или джойстика)
+    public void SetMoveRight() => HorizontalInput = 1f;
+    public void SetMoveLeft() => HorizontalInput = -1f;
+    public void StopMoving() => HorizontalInput = 0f;
 
     public void Jump()
     {
-        if (_isGrounded)
+        // Прыгать можно только с земли и если мы не сидим
+        if (IsGrounded && StateMachine.CurrentState != CrouchState)
         {
-            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
-            _animator.SetTrigger("Jump");
+            StateMachine.ChangeState(JumpState);
         }
-
     }
 
     public void Crouch()
     {
-        if (!_isCrouching && _isGrounded)
+        // Приседать можно только на земле и если мы не в прыжке
+        if (IsGrounded && StateMachine.CurrentState != JumpState && StateMachine.CurrentState != CrouchState)
         {
-            _isCrouching = true;
-            _animator.SetBool("IsCrouching", true);
-            // Изменяем размер коллайдера для приседания
-            _collider.size = new Vector2(_originalColliderSize.x, _originalColliderSize.y / 2);
-            _collider.offset = new Vector2(_originalColliderOffset.x, _originalColliderOffset.y - (_originalColliderSize.y / 4));
+            StateMachine.ChangeState(CrouchState);
         }
     }
 
     public void StandUp()
     {
-            _isCrouching = false;
-            _animator.SetBool("IsCrouching", false);
-
-            // Возвращаем коллайдер в исходное состояние
-            _collider.size = _originalColliderSize;
-            _collider.offset = _originalColliderOffset;
+        // Встать можно только из состояния приседания
+        if (StateMachine.CurrentState == CrouchState)
+        {
+            // Возвращаемся в Idle или сразу в Run, если зажата клавиша движения
+            if (Mathf.Abs(HorizontalInput) > 0.1f)
+                StateMachine.ChangeState(RunState);
+            else
+                StateMachine.ChangeState(IdleState);
+        }
     }
-
 }
