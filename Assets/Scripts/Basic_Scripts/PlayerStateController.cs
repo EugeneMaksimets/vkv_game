@@ -41,15 +41,14 @@ public class PlayerStateController : MonoBehaviour
     public PlayerCrouchState CrouchState { get; private set; }
     public PlayerAttackState AttackState { get; private set; }
 
+    private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
+
     private void Awake()
     {
         Rb = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
         Collider = GetComponent<BoxCollider2D>();
         _playerMovement = GetComponent<PlayerMovement>();
-
-        if (_playerMovement == null)
-            _playerMovement = GetComponent<PlayerMovement>();
 
         OriginalColliderSize = Collider.size;
         OriginalColliderOffset = Collider.offset;
@@ -71,53 +70,11 @@ public class PlayerStateController : MonoBehaviour
 
     private void Update()
     {
-        Animator.SetBool("IsGrounded", IsGrounded);
+        Animator.SetBool(IsGroundedHash, IsGrounded);
 
         StateMachine.Update();
 
         UpdateFacingDirection();
-    }
-
-    private void HandleKeyboardInput()
-    {
-        if (_isJoystickActive || Keyboard.current == null)
-            return;
-
-        var keyboard = Keyboard.current;
-
-        bool right =
-            keyboard.dKey.isPressed ||
-            keyboard.rightArrowKey.isPressed;
-
-        bool left =
-            keyboard.aKey.isPressed ||
-            keyboard.leftArrowKey.isPressed;
-
-        bool crouch =
-            keyboard.sKey.isPressed ||
-            keyboard.downArrowKey.isPressed;
-
-        bool crouchReleased =
-            keyboard.sKey.wasReleasedThisFrame ||
-            keyboard.downArrowKey.wasReleasedThisFrame;
-
-        if (right && !left)
-            SetMoveRight();
-        else if (left && !right)
-            SetMoveLeft();
-        else
-            StopMoving();
-
-        if (keyboard.spaceKey.wasPressedThisFrame)
-            Jump();
-
-        if (crouch)
-            Crouch();
-        else if (crouchReleased)
-            StandUp();
-
-        if (keyboard.fKey.wasPressedThisFrame)
-            Attack();
     }
 
     private void UpdateFacingDirection()

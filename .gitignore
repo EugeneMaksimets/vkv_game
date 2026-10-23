@@ -1,0 +1,99 @@
+Animation/
+Image/
+Resources/
+Scenes/
+.vscode
+Settings/
+TextMesh Pro/
+Welcome/
+VKV_game.slnx
+Packages/
+Library/
+Logs/
+Temp/
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Ll]ogs/
+*.csproj
+*.sln
+*.slnx
+
+
+# Unity + C# — upload source code only
+
+# Unity generated folders / cache
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+.vs/
+.idea/
+.gradle/
+.vscode/
+
+# Unity-generated files
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.tmp
+*.orig
+*.bak
+*.cache
+
+# Build output
+*.apk
+*.aab
+*.app
+*.unitypackage
+*.zip
+*.7z
+*.dll
+*.so
+*.dylib
+*.exe
+
+# Assets: ignore all asset files, but keep directories traversable
+Assets/**
+!Assets/**/
+
+# Keep only C# source files and their .meta files
+!Assets/**/*.cs
+!Assets/**/*.cs.meta
+!Assets/*.cs
+!Assets/*.cs.meta
+
+# Keep package manifest/lock so Unity knows which packages are used
+!Packages/
+!Packages/manifest.json
+!Packages/packages-lock.json
+
+# Ignore Unity project settings as requested
+ProjectSettings/
+
+# Ignore common OS files
+.DS_Store
+Thumbs.db
+
+
+
+# TextMesh Pro — ignore all package assets and scripts
+/Assets/TextMesh Pro/
+/Assets/TextMeshPro/
+
+/Assets/Welcome
