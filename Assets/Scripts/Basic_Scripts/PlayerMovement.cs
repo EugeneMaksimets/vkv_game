@@ -43,29 +43,9 @@ public class PlayerMovement : MonoBehaviour
                 _groundCheckRadius,
                 _groundLayer
             );
-            
     }
 
-    private void FixedUpdate()
-    {
-        float speed = _isCrouching
-            ? _moveSpeed * _crouchSpeedMultiplier
-            : _moveSpeed;
-
-        Rb.linearVelocity = new Vector2(
-            _horizontalInput * speed,
-            Rb.linearVelocity.y
-        );
-
-        if (_useLevelBounds)
-        {
-            Vector2 position = Rb.position;
-            position.x = Mathf.Clamp(position.x, _minX, _maxX);
-            Rb.position = position;
-        }
-    }
-
-        public void SetHorizontalInput(float input)
+    public void SetHorizontalInput(float input)
     {
         _horizontalInput = Mathf.Clamp(input, -1f, 1f);
     }
@@ -86,4 +66,22 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
+    private void FixedUpdate()
+    {
+        float speed = _isCrouching
+            ? _moveSpeed * _crouchSpeedMultiplier
+            : _moveSpeed;
+
+        Rb.linearVelocity = new Vector2(
+            _horizontalInput * speed,
+            Rb.linearVelocity.y
+        );
+
+        if (_useLevelBounds)
+        {
+            Vector2 position = Rb.position;
+            position.x = Mathf.Clamp(position.x, _minX, _maxX);
+            Rb.position = position;
+        }
+    }
 }

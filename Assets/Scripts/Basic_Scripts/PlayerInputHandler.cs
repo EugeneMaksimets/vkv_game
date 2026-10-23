@@ -3,11 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputHandler : MonoBehaviour
 {
-    private PlayerStateController _player;
-
-    private void Awake() {
-        _player = GetComponent<PlayerStateController>();
-    }
+    [SerializeField] private PlayerStateController _player;
 
     private void Update()
     {
