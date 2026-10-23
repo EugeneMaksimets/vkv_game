@@ -45,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
     public PlayerRunState RunState { get; private set; }
     public PlayerJumpState JumpState { get; private set; }
     public PlayerCrouchState CrouchState { get; private set; }
+    public PlayerAttackState AttackState { get; private set; }
 
     void Awake() {
         Rb = GetComponent<Rigidbody2D>();
@@ -57,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
         RunState = new PlayerRunState(this);
         JumpState = new PlayerJumpState(this);
         CrouchState = new PlayerCrouchState(this);
+        AttackState = new PlayerAttackState(this);
     }
     void Start()
     {
@@ -85,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
             bool isJumpPressed = Keyboard.current.spaceKey.wasPressedThisFrame;
             bool isCrouchPressed = Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed;
             bool isStandUp = Keyboard.current.sKey.wasReleasedThisFrame || Keyboard.current.downArrowKey.wasReleasedThisFrame;
+            bool isAttackPressed = Keyboard.current.fKey.wasPressedThisFrame;
 
             if (isRightPressed) SetMoveRight();
             else if (isLeftPressed) SetMoveLeft();
@@ -94,6 +97,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (isCrouchPressed) Crouch();
             else if (isStandUp) StandUp();
+            if(isAttackPressed) Attack();
         }
 
         // 3. Обновляем логику текущего состояния State Machine
@@ -158,5 +162,13 @@ public class PlayerMovement : MonoBehaviour
             else
                 StateMachine.ChangeState(IdleState);
         }
+    }
+
+    public void Attack()
+    {
+        if(IsGrounded && StateMachine.CurrentState != CrouchState && StateMachine.CurrentState != RunState && StateMachine.CurrentState != AttackState)
+        {
+            StateMachine.ChangeState(AttackState);
+        } //TODO: when start attack and run start slice
     }
 }
