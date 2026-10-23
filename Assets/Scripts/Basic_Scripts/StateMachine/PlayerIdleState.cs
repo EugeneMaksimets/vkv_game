@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class PlayerIdleState : IPlayerState
 {
-    private PlayerMovement _player;
+    private PlayerStateController _player;
 
-    public PlayerIdleState(PlayerMovement player)
+    public PlayerIdleState(PlayerStateController player)
     {
         _player = player;
     }

@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class PlayerCrouchState : IPlayerState
 {
-    private PlayerMovement _player;
+    private PlayerStateController _player;
 
-    public PlayerCrouchState(PlayerMovement player)
+    public PlayerCrouchState(PlayerStateController player)
     {
         _player = player;
     }

@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
-    private PlayerMovement _player;
+    private PlayerStateController _player;
     private float _attackTimer;
     private float _attackDuration = 0.5f;
 
-    public PlayerAttackState(PlayerMovement player)
+    public PlayerAttackState(PlayerStateController player)
     {
         _player = player;
     }
