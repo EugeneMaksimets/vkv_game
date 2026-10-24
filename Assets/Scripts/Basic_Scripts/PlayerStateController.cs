@@ -1,6 +1,6 @@
 
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
@@ -8,13 +8,11 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerStateController : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private PlayerMovement _playerMovement;
+    private PlayerMovement _playerMovement;
 
     public Rigidbody2D Rb { get; private set; }
     public Animator Animator { get; private set; }
     public BoxCollider2D Collider { get; private set; }
-    public PlayerMovement PlayerMovement => _playerMovement;
 
     [Header("Input")]
     public float HorizontalInput { get; private set; }
@@ -47,9 +45,7 @@ public class PlayerStateController : MonoBehaviour
         Rb = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
         Collider = GetComponent<BoxCollider2D>();
-
-        if (_playerMovement == null)
-            _playerMovement = GetComponent<PlayerMovement>();
+        _playerMovement = GetComponent<PlayerMovement>();
 
         OriginalColliderSize = Collider.size;
         OriginalColliderOffset = Collider.offset;
@@ -79,65 +75,29 @@ public class PlayerStateController : MonoBehaviour
         UpdateFacingDirection();
     }
 
-    private void HandleKeyboardInput()
-    {
-        if (_isJoystickActive || Keyboard.current == null)
-            return;
 
-        var keyboard = Keyboard.current;
-
-        bool right =
-            keyboard.dKey.isPressed ||
-            keyboard.rightArrowKey.isPressed;
-
-        bool left =
-            keyboard.aKey.isPressed ||
-            keyboard.leftArrowKey.isPressed;
-
-        bool crouch =
-            keyboard.sKey.isPressed ||
-            keyboard.downArrowKey.isPressed;
-
-        bool crouchReleased =
-            keyboard.sKey.wasReleasedThisFrame ||
-            keyboard.downArrowKey.wasReleasedThisFrame;
-
-        if (right && !left)
-            SetMoveRight();
-        else if (left && !right)
-            SetMoveLeft();
-        else
-            StopMoving();
-
-        if (keyboard.spaceKey.wasPressedThisFrame)
-            Jump();
-
-        if (crouch)
-            Crouch();
-        else if (crouchReleased)
-            StandUp();
-
-        if (keyboard.fKey.wasPressedThisFrame)
-            Attack();
-    }
 
     private void UpdateFacingDirection()
     {
         if (HorizontalInput > 0f)
         {
-            transform.localScale = new Vector3(
+            Vector3 newScale = new Vector3(
                 Mathf.Abs(_originalScale.x),
                 _originalScale.y,
                 _originalScale.z
             );
+            if (transform.localScale != newScale)
+                transform.localScale = newScale;
         }
         else if (HorizontalInput < 0f)
         {
-            transform.localScale = new Vector3(
+            Vector3 newScale = new Vector3(
                 -Mathf.Abs(_originalScale.x),
                 _originalScale.y,
                 _originalScale.z
             );
+            if (transform.localScale != newScale)
+                transform.localScale = newScale;
         }
     }
 
@@ -145,7 +105,7 @@ public class PlayerStateController : MonoBehaviour
 
     public void SetHorizontalInput(float input)
     {
-        HorizontalInput = Mathf.Clamp(input, -1f, 1f);
+        HorizontalInput = input;
         _playerMovement.SetHorizontalInput(HorizontalInput);
     }
 
@@ -159,13 +119,18 @@ public class PlayerStateController : MonoBehaviour
 
     public void Jump()
     {
-        if (IsGrounded &&
-            StateMachine.CurrentState != CrouchState &&
-            StateMachine.CurrentState != AttackState &&
-            StateMachine.CurrentState != JumpState)
+        if (CanJump())
         {
             StateMachine.ChangeState(JumpState);
         }
+    }
+
+    private bool CanJump()
+    {
+        return IsGrounded &&
+               StateMachine.CurrentState != CrouchState &&
+               StateMachine.CurrentState != AttackState &&
+               StateMachine.CurrentState != JumpState;
     }
 
     public void Crouch()
