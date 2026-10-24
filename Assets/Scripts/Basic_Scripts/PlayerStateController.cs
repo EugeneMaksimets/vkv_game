@@ -141,6 +141,7 @@ public class PlayerStateController : MonoBehaviour
             StateMachine.CurrentState != CrouchState)
         {
             StateMachine.ChangeState(CrouchState);
+            _playerMovement.SetCrouching(true);
         }
     }
 
@@ -150,9 +151,15 @@ public class PlayerStateController : MonoBehaviour
             return;
 
         if (Mathf.Abs(HorizontalInput) > 0.1f)
+        {
             StateMachine.ChangeState(RunState);
+            _playerMovement.SetCrouching(false);
+        }
         else
+        {
             StateMachine.ChangeState(IdleState);
+            _playerMovement.SetCrouching(false);
+        }
     }
 
     public void Attack()
