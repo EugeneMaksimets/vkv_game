@@ -67,7 +67,6 @@ public class PlayerStateController : MonoBehaviour
 
     private void Update()
     {
-        // HandleKeyboardInput();
         Animator.SetBool("IsGrounded", IsGrounded);
 
         StateMachine.Update();

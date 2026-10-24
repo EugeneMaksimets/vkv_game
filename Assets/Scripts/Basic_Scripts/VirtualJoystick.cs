@@ -2,9 +2,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Image))]
+[RequireComponent(typeof(RectTransform))]
 public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
-    private UnityEngine.UI.Image _joystickImage;
+    private Image _joystickImage;
     private RectTransform _rectTransform;
     private Vector2 _inputVector = Vector2.zero;
     [SerializeField] private PlayerStateController _playerStateController; 

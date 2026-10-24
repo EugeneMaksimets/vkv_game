@@ -1,9 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(PlayerStateController))]
 public class PlayerInputHandler : MonoBehaviour
 {
-    [SerializeField] private PlayerStateController _player;
+    private PlayerStateController _player;
+
+    void Awake()
+    {
+        _player = GetComponent<PlayerStateController>();
+    }
 
     private void Update()
     {
