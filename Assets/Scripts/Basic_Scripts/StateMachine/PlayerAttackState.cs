@@ -2,19 +2,19 @@ using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
-    private PlayerStateController _player;
+    private PlayerStateController _playerStateControler;
     private float _attackTimer;
     private float _attackDuration = 0.5f;
 
-    public PlayerAttackState(PlayerStateController player)
+    public PlayerAttackState(PlayerStateController playerStateController)
     {
-        _player = player;
+        _playerStateControler = playerStateController;
     }
 
     public void Enter()
     {
-        _player.StopMoving();
-        _player.Animator.SetTrigger("Attack");
+        _playerStateControler.StopMoving();
+        _playerStateControler.Animator.SetTrigger("Attack");
         _attackTimer = _attackDuration;
 
         // Здесь же можно вызвать метод нанесения урона
@@ -27,13 +27,13 @@ public class PlayerAttackState : IPlayerState
         // Когда время анимации/удара истекло, возвращаемся в Idle или Run
         if (_attackTimer <= 0f)
         {
-            if (Mathf.Abs(_player.HorizontalInput) > 0.1f)
+            if (Mathf.Abs(_playerStateControler.HorizontalInput) > 0.1f)
             {
-                _player.StateMachine.ChangeState(_player.RunState);
+                _playerStateControler.StateMachine.ChangeState(_playerStateControler.RunState);
             }
             else
             {
-                _player.StateMachine.ChangeState(_player.IdleState);
+                _playerStateControler.StateMachine.ChangeState(_playerStateControler.IdleState);
             }
         }
     }

@@ -2,34 +2,34 @@ using UnityEngine;
 
 public class PlayerCrouchState : IPlayerState
 {
-    private PlayerStateController _player;
+    private PlayerStateController _playerStateControler;
 
-    public PlayerCrouchState(PlayerStateController player)
+    public PlayerCrouchState(PlayerStateController playerStateController)
     {
-        _player = player;
+        _playerStateControler = playerStateController;
     }
 
     public void Enter()
     {
-        _player.Animator.SetBool("IsCrouching", true);
+        _playerStateControler.Animator.SetBool("IsCrouching", true);
         
         // Уменьшаем коллайдер для приседания
-        _player.Collider.size = new Vector2(_player.OriginalColliderSize.x, _player.OriginalColliderSize.y / 2);
-        _player.Collider.offset = new Vector2(_player.OriginalColliderOffset.x, _player.OriginalColliderOffset.y - (_player.OriginalColliderSize.y / 4));
+        _playerStateControler.Collider.size = new Vector2(_playerStateControler.OriginalColliderSize.x, _playerStateControler.OriginalColliderSize.y / 2);
+        _playerStateControler.Collider.offset = new Vector2(_playerStateControler.OriginalColliderOffset.x, _playerStateControler.OriginalColliderOffset.y - (_playerStateControler.OriginalColliderSize.y / 4));
     }
 
     public void UpdateState()
     {
         // Передаем абсолютное значение горизонтального ввода в параметр Speed для анимации ходьбы на корточках
-        _player.Animator.SetFloat("Speed", Mathf.Abs(_player.HorizontalInput));
+        _playerStateControler.Animator.SetFloat("Speed", Mathf.Abs(_playerStateControler.HorizontalInput));
     }
 
     public void Exit()
     {
-        _player.Animator.SetBool("IsCrouching", false);
+        _playerStateControler.Animator.SetBool("IsCrouching", false);
 
         // Возвращаем коллайдер в исходное состояние
-        _player.Collider.size = _player.OriginalColliderSize;
-        _player.Collider.offset = _player.OriginalColliderOffset;
+        _playerStateControler.Collider.size = _playerStateControler.OriginalColliderSize;
+        _playerStateControler.Collider.offset = _playerStateControler.OriginalColliderOffset;
     }
 }
