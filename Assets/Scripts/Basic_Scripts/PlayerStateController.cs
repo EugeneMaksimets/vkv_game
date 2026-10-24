@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 
@@ -34,11 +33,11 @@ public class PlayerStateController : MonoBehaviour
 
     [Header("State Machine")]
     public PlayerStateMachine StateMachine { get; private set; }
-    public PlayerIdleState IdleState { get; private set; }
-    public PlayerRunState RunState { get; private set; }
-    public PlayerJumpState JumpState { get; private set; }
-    public PlayerCrouchState CrouchState { get; private set; }
-    public PlayerAttackState AttackState { get; private set; }
+    internal PlayerIdleState IdleState { get; private set; }
+    internal PlayerRunState RunState { get; private set; }
+    internal PlayerJumpState JumpState { get; private set; }
+    internal PlayerCrouchState CrouchState { get; private set; }
+    internal PlayerAttackState AttackState { get; private set; }
 
     private void Awake()
     {
