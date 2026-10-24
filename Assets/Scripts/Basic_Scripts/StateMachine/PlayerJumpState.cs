@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class PlayerJumpState : IPlayerState
 {
-    private PlayerStateController _playerStateControler;
+    private PlayerStateController _playerStateController;
     private bool _hasLeftGround;
 
     public PlayerJumpState(PlayerStateController playerStateController)
     {
-        _playerStateControler = playerStateController;
+        _playerStateController = playerStateController;
     }
 
     public void Enter()
@@ -16,13 +16,13 @@ public class PlayerJumpState : IPlayerState
         _hasLeftGround = false;
 
         // Запускаем прыжок
-        _playerStateControler.Rb.linearVelocity = new Vector2(
-            _playerStateControler.Rb.linearVelocity.x,
-            _playerStateControler.JumpForce
+        _playerStateController.Rb.linearVelocity = new Vector2(
+            _playerStateController.Rb.linearVelocity.x,
+            _playerStateController.JumpForce
         );
 
-        _playerStateControler.Animator.ResetTrigger("Jump");
-        _playerStateControler.Animator.SetTrigger("Jump");
+        _playerStateController.Animator.ResetTrigger("Jump");
+        _playerStateController.Animator.SetTrigger("Jump");
     }
 
     public void UpdateState()
@@ -30,23 +30,23 @@ public class PlayerJumpState : IPlayerState
         // Сначала обязательно ждём отрыва от земли
         if (!_hasLeftGround)
         {
-            if (!_playerStateControler.IsGrounded)
+            if (!_playerStateController.IsGrounded)
                 _hasLeftGround = true;
 
             return;
         }
 
         // Возвращаемся в обычное состояние только после приземления
-        if (_playerStateControler.IsGrounded &&
-            _playerStateControler.Rb.linearVelocity.y <= 0.01f)
+        if (_playerStateController.IsGrounded &&
+            _playerStateController.Rb.linearVelocity.y <= 0.01f)
         {
-            if (Mathf.Abs(_playerStateControler.HorizontalInput) > 0.1f)
+            if (Mathf.Abs(_playerStateController.HorizontalInput) > 0.1f)
             {
-                _playerStateControler.StateMachine.ChangeState(_playerStateControler.RunState);
+                _playerStateController.StateMachine.ChangeState(_playerStateController.RunState);
             }
             else
             {
-                _playerStateControler.StateMachine.ChangeState(_playerStateControler.IdleState);
+                _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
             }
         }
     }

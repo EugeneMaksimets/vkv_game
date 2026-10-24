@@ -4,20 +4,20 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerStateController))]
 public class PlayerInputHandler : MonoBehaviour
 {
-    private PlayerStateController _playerStateControler;
+    private PlayerStateController _playerStateController;
 
     void Awake()
     {
-        _playerStateControler = GetComponent<PlayerStateController>();
+        _playerStateController = GetComponent<PlayerStateController>();
     }
 
     private void Update()
     {
-        if(_playerStateControler == null)
+        if(_playerStateController == null)
             return;
 
         //Check Joystick
-        if(_playerStateControler.IsJoystickActive)
+        if(_playerStateController.IsJoystickActive)
             return;
 
         if (Keyboard.current == null)
@@ -33,23 +33,23 @@ public class PlayerInputHandler : MonoBehaviour
             Keyboard.current.rightArrowKey.isPressed)
             horizontal = 1f;
 
-        _playerStateControler.SetHorizontalInput(horizontal);
+        _playerStateController.SetHorizontalInput(horizontal);
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            _playerStateControler.Jump();
+            _playerStateController.Jump();
 
         if (Keyboard.current.fKey.wasPressedThisFrame)
-            _playerStateControler.Attack();
+            _playerStateController.Attack();
 
         bool crouch =
             Keyboard.current.sKey.isPressed ||
             Keyboard.current.downArrowKey.isPressed;
 
         if (crouch)
-            _playerStateControler.Crouch();
+            _playerStateController.Crouch();
         else if (
             Keyboard.current.sKey.wasReleasedThisFrame ||
             Keyboard.current.downArrowKey.wasReleasedThisFrame)
-            _playerStateControler.StandUp();
+            _playerStateController.StandUp();
     }
 }
