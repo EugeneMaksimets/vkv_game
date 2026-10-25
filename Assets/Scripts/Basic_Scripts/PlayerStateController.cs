@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(PlayerInterectable))]
 public class PlayerStateController : MonoBehaviour
 {
     private PlayerMovement _playerMovement;
@@ -12,6 +13,7 @@ public class PlayerStateController : MonoBehaviour
     public Rigidbody2D Rb { get; private set; }
     public Animator Animator { get; private set; }
     public BoxCollider2D Collider { get; private set; }
+    public PlayerInterectable Interectable { get; private set; }
 
     [Header("Input")]
     public float HorizontalInput { get; private set; }
@@ -38,12 +40,14 @@ public class PlayerStateController : MonoBehaviour
     internal PlayerJumpState JumpState { get; private set; }
     internal PlayerCrouchState CrouchState { get; private set; }
     internal PlayerAttackState AttackState { get; private set; }
+    internal PlayerInteractState InteractState { get; private set; }
 
     private void Awake()
     {
         Rb = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
         Collider = GetComponent<BoxCollider2D>();
+        Interectable = GetComponent<PlayerInterectable>();
         _playerMovement = GetComponent<PlayerMovement>();
 
         OriginalColliderSize = Collider.size;
@@ -57,6 +61,7 @@ public class PlayerStateController : MonoBehaviour
         JumpState = new PlayerJumpState(this);
         CrouchState = new PlayerCrouchState(this);
         AttackState = new PlayerAttackState(this);
+        InteractState = new PlayerInteractState(this);
     }
 
     private void Start()
@@ -170,5 +175,10 @@ public class PlayerStateController : MonoBehaviour
         {
             StateMachine.ChangeState(AttackState);
         }
+    }
+
+    public void Interact()
+    {
+        StateMachine.ChangeState(InteractState);
     }
 }

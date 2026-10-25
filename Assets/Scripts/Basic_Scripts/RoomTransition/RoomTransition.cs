@@ -3,13 +3,12 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(BoxCollider2D))]
-public class RoomTransition : MonoBehaviour
+public class RoomTransition : MonoBehaviour, IInteractable
 {
     [Header("Target Scene")]
     [SerializeField] private string _sceneToLoad;
     [SerializeField] private string _doorName;
-    private bool _isPlayerInside = false;
-    private string _tag = "Player";
+
 
     void Awake()
     {
@@ -17,33 +16,10 @@ public class RoomTransition : MonoBehaviour
         collider.isTrigger = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if(other.CompareTag(_tag))
-        {
-            _isPlayerInside = true;
-            // Debug.Log("Player Enter");
-        }
-    }
 
-    private void OnTriggerExit2D(Collider2D other) {
-        if (other.CompareTag(_tag))
-        {
-            _isPlayerInside = false;
-            // Debug.Log("Player Exit");
-        }
-    }
-
-    void Update()
+    public void Interact()
     {
-        if (_isPlayerInside)
-        {
-            bool isInteractPressed = Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
-            if(isInteractPressed)
-            {
-                LoadNextScene();
-            }
-        }
+        LoadNextScene();
     }
 
     private void LoadNextScene()

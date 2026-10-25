@@ -51,5 +51,10 @@ public class PlayerInputHandler : MonoBehaviour
             Keyboard.current.sKey.wasReleasedThisFrame ||
             Keyboard.current.downArrowKey.wasReleasedThisFrame)
             _playerStateController.StandUp();
+
+        bool isInteractPressed = 
+            Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
+        if(isInteractPressed)
+            _playerStateController.Interact();
     }
 }

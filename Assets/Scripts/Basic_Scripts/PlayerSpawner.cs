@@ -4,7 +4,6 @@ public class PlayerSpawner : MonoBehaviour
 {
     void Start()
     {
-        Debug.Log("Ищем дверь спавна для: " + TransitionSpawnManager.LastDoorName);
         DoorSpawnPoint[] spawnPoints = Object.FindObjectsByType<DoorSpawnPoint>(FindObjectsInactive.Exclude);
 
         if (spawnPoints == null || spawnPoints.Length == 0)
