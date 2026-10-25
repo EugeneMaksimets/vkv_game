@@ -179,6 +179,11 @@ public class PlayerStateController : MonoBehaviour
 
     public void Interact()
     {
-        StateMachine.ChangeState(InteractState);
+        bool hasInteractable = Interectable != null && Interectable.CurrentInteractable != null;
+
+        if(hasInteractable)
+            StateMachine.ChangeState(InteractState);
+        else
+            Debug.Log("Nothing to use");
     }
 }

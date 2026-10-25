@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerInteractState : IPlayerState
@@ -19,12 +20,10 @@ public class PlayerInteractState : IPlayerState
         {
             _playerStateController.Interectable.CurrentInteractable.Interact();
         }
-        else
-        {
-            Debug.Log("Рядом нет объектов для взаимодействия!");
-            // Если взаимодействовать не с чем
+
+        //TODO: change logic with animation
             _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
-        }
+            
     }
 
     public void UpdateState() 

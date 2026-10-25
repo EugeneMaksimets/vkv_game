@@ -1,9 +1,33 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerSpawner : MonoBehaviour
 {
-    void Start()
+    private void OnEnable()
     {
+        // Подписываемся на событие загрузки сцены
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        // Отписываемся при уничтожении объекта
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SpawnPlayerAtDoor();
+    }
+
+    private void SpawnPlayerAtDoor()
+    {
+        if (string.IsNullOrEmpty(TransitionSpawnManager.LastDoorName))
+        {
+            Debug.Log("PlayerSpawner: LastDoorName пуста. Спавн по умолчанию.");
+            return;
+        }
+
         DoorSpawnPoint[] spawnPoints = Object.FindObjectsByType<DoorSpawnPoint>(FindObjectsInactive.Exclude);
 
         if (spawnPoints == null || spawnPoints.Length == 0)
@@ -16,9 +40,22 @@ public class PlayerSpawner : MonoBehaviour
 
         foreach (var spawnPoint in spawnPoints)
         {
+            Debug.Log($"Сравниваем точку на сцене [{spawnPoint.DoorID}] с тем, что в менеджере [{TransitionSpawnManager.LastDoorName}]");
+
             if (spawnPoint.DoorID == TransitionSpawnManager.LastDoorName)
             {
-                transform.position = spawnPoint.transform.position;
+                Rigidbody2D rb = GetComponent<Rigidbody2D>();
+                if (rb != null)
+                {
+                    rb.position = spawnPoint.transform.position;
+                    rb.linearVelocity = Vector2.zero;
+                }
+                else
+                {
+                    transform.position = spawnPoint.transform.position;
+                }
+
+                Debug.Log("Игрок успешно телепортирован к точке: " + spawnPoint.DoorID);
                 spawned = true;
                 break;
             }
@@ -26,7 +63,7 @@ public class PlayerSpawner : MonoBehaviour
 
         if (!spawned)
         {
-            Debug.Log("Точка спавна с ID '" + TransitionSpawnManager.LastDoorName + "' не найдена. Игрок остался на стартовой позиции.");
+            Debug.LogWarning($"Точка спавна с ID '{TransitionSpawnManager.LastDoorName}' на этой сцене НЕ НАЙДЕНА! Проверь написание в DoorSpawnPoint.");
         }
     }
 }
