@@ -31,7 +31,8 @@ public class PlayerInteractState : IPlayerState
     { 
     }
 
-    public void Exit() 
-    { 
+    public void Exit()
+    {
+
     }
 }

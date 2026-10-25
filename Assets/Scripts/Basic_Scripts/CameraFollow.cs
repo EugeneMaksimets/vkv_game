@@ -14,9 +14,20 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float _minCameraX = 0f;      // Левый край (чтобы камера не уходила в пустоту)
     [SerializeField] private float _maxCameraX = 6f;     // Правый край уровня
 
+    void Start()
+    {
+        if (_target == null)
+        {
+            FindPlayer();
+        }
+    }
+
     void LateUpdate()
     {
-        if (_target == null) return;
+        if (_target == null) {
+            FindPlayer();
+            return;
+        }
 
         // check the direction of the target's scale to determine which way the player is facing
         float directionX = Mathf.Sign(_target.localScale.x);
@@ -38,5 +49,14 @@ public class CameraFollow : MonoBehaviour
 
         // Применяем финальную позицию
         transform.position = new Vector3(smoothedPosition.x, smoothedPosition.y, -10f);
+    }
+
+    private void FindPlayer()
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        if (player != null)
+        {
+            _target = player.transform;
+        }
     }
 }
