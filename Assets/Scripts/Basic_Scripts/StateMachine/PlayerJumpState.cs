@@ -14,13 +14,6 @@ public class PlayerJumpState : IPlayerState
     public void Enter()
     {
         _hasLeftGround = false;
-
-        // Запускаем прыжок
-        _playerStateController.Rb.linearVelocity = new Vector2(
-            _playerStateController.Rb.linearVelocity.x,
-            _playerStateController.JumpForce
-        );
-
         _playerStateController.Animator.ResetTrigger("Jump");
         _playerStateController.Animator.SetTrigger("Jump");
     }

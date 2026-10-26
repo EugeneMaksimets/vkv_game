@@ -124,6 +124,7 @@ public class PlayerStateController : MonoBehaviour
     {
         if (CanJump())
         {
+            _playerMovement.Jump();
             StateMachine.ChangeState(JumpState);
         }
     }
