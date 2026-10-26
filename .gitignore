@@ -55,6 +55,7 @@ Temp/
 *.orig
 *.bak
 *.cache
+*.meta
 
 # Build output
 *.apk
@@ -74,9 +75,9 @@ Assets/**
 
 # Keep only C# source files and their .meta files
 !Assets/**/*.cs
-!Assets/**/*.cs.meta
+# !Assets/**/*.cs.meta
 !Assets/*.cs
-!Assets/*.cs.meta
+# !Assets/*.cs.meta
 
 # Keep package manifest/lock so Unity knows which packages are used
 !Packages/
