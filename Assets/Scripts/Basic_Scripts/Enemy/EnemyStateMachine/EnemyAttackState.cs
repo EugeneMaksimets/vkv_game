@@ -16,6 +16,10 @@ public class EnemyAttackState : IEnemyState
 
     public void Enter()
     {
+        if (!_controller.CanMove)
+        {
+           _controller.Movement.FaceTarget(_controller.Target.Target); 
+        }
         _timer = 0f;
         _damageAttempted = false;
         _controller.Movement.Stop();

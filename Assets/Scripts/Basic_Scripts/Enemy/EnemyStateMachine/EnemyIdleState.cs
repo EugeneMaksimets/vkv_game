@@ -18,6 +18,10 @@ public class EnemyIdleState : IEnemyState
 
     public void UpdateState()
     {
+        if (!_controller.CanMove)
+        {
+           _controller.Movement.FaceTarget(_controller.Target.Target); 
+        }
         _controller.ChooseIdleWalkOrAttackState();
     }
 

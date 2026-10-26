@@ -37,12 +37,25 @@ public class EnemyMovement : MonoBehaviour
         _direction = Mathf.Clamp(direction, -1f, 1f);
 
         if (Mathf.Abs(_direction) > 0.01f)
-            UpdateFacingDirection();
+            UpdateFacingDirection(_direction);
     }
 
     public void Stop()
     {
         _direction = 0f;
+    }
+
+    public void FaceTarget(Transform target)
+    {
+        if (target == null)
+            return;
+
+        float directionX = target.position.x - transform.position.x;
+
+        if (Mathf.Abs(directionX) > 0.01f)
+        {
+            UpdateFacingDirection(directionX);
+        }
     }
 
     private void FixedUpdate()
@@ -53,9 +66,9 @@ public class EnemyMovement : MonoBehaviour
         );
     }
 
-    private void UpdateFacingDirection()
+    private void UpdateFacingDirection(float dir)
     {
-        float scaleX = Mathf.Abs(_originalScale.x) * Mathf.Sign(_direction);
+        float scaleX = Mathf.Abs(_originalScale.x) * Mathf.Sign(dir);
         transform.localScale = new Vector3(scaleX, _originalScale.y, _originalScale.z);
     }
 

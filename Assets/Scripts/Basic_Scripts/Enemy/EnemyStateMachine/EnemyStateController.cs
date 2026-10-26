@@ -15,6 +15,11 @@ public class EnemyStateController : MonoBehaviour
     [SerializeField] private float _attackDamageTime = 0.25f;
     [SerializeField] private float _getDamageDuration = 0.25f;
     [SerializeField] private bool _canMove = false;
+    public bool CanMove
+    {
+        get => _canMove;
+        set => _canMove = value;
+    }
 
     [Header("Animator Parameters")]
     [SerializeField] private string _speedParameter = "Speed";
