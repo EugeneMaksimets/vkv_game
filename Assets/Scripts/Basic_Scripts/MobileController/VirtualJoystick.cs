@@ -19,6 +19,12 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     
     void Awake()
     {
+        // Если забыл перетащить в инспекторе, находим игрока автоматически на сцене
+        if (_playerStateController == null)
+        {
+            _playerStateController = FindAnyObjectByType<PlayerStateController>();
+        }
+        
         _joystickImage = GetComponent<Image>();
         _rectTransform = GetComponent<RectTransform>();
     }

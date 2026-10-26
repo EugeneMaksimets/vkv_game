@@ -3,19 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class PlayerSpawner : MonoBehaviour
 {
-    private void OnEnable()
-    {
-        // Подписываемся на событие загрузки сцены
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
 
-    private void OnDisable()
-    {
-        // Отписываемся при уничтожении объекта
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    void Start()
     {
         SpawnPlayerAtDoor();
     }

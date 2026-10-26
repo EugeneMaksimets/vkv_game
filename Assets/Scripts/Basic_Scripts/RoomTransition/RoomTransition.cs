@@ -1,6 +1,6 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class RoomTransition : MonoBehaviour, IInteractable
@@ -26,6 +26,10 @@ public class RoomTransition : MonoBehaviour, IInteractable
     {
         if (!string.IsNullOrEmpty(_sceneToLoad))
         {
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
             TransitionSpawnManager.LastDoorName = _doorName;
             SceneManager.LoadScene(_sceneToLoad);
         }
