@@ -16,6 +16,13 @@ public class PlayerInputHandler : MonoBehaviour
         if(_playerStateController == null)
             return;
 
+        // Не считываем новые команды, пока состояние урона или смерти блокирует управление.
+        if (_playerStateController.IsControlLocked)
+        {
+            _playerStateController.StopMoving();
+            return;
+        }
+
         //Check Joystick
         if(_playerStateController.IsJoystickActive)
             return;

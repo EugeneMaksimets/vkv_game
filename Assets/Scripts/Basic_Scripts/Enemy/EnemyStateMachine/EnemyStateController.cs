@@ -68,13 +68,13 @@ public class EnemyStateController : MonoBehaviour
 
     private void OnEnable()
     {
-        Health.HealthChanged += HandleHealthChanged;
+        Health.Damaged += HandleDamaged;
         Health.Died += HandleDeath;
     }
 
     private void OnDisable()
     {
-        Health.HealthChanged -= HandleHealthChanged;
+        Health.Damaged -= HandleDamaged;
         Health.Died -= HandleDeath;
     }
 
@@ -129,9 +129,9 @@ public class EnemyStateController : MonoBehaviour
         Animator.SetTrigger(_dieTrigger);
     }
 
-    private void HandleHealthChanged(EnemyHealth health, float currentHealth)
+    private void HandleDamaged(EnemyHealth health, DamageInfo damageInfo)
     {
-        if (!Health.IsDead)
+        if (health.CurrentHealth > 0f)
             StateMachine.ChangeState(GetDamageState);
     }
 

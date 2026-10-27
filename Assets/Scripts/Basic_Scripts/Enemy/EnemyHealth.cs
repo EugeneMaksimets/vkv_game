@@ -14,6 +14,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsDead { get; private set; }
 
     public event Action<EnemyHealth, float> HealthChanged;
+    public event Action<EnemyHealth, DamageInfo> Damaged;
     public event Action<EnemyHealth> Died;
 
     private void Awake()
@@ -21,16 +22,27 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         CurrentHealth = _maxHealth;
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(DamageInfo damageInfo)
     {
-        if (IsDead || damage <= 0f)
+        if (IsDead || damageInfo.Amount <= 0f)
             return;
 
-        CurrentHealth = Mathf.Max(0f, CurrentHealth - damage);
+        float previousHealth = CurrentHealth;
+        CurrentHealth = Mathf.Max(0f, CurrentHealth - damageInfo.Amount);
+        
+        float appliedDamage = previousHealth - CurrentHealth;
+
+        if(appliedDamage <= 0f)
+            return;
+
+        DamageInfo appliedDamageInfo = damageInfo.WithAmount(appliedDamage);
+
         HealthChanged?.Invoke(this, CurrentHealth);
+        Damaged?.Invoke(this, appliedDamageInfo);
 
         if (CurrentHealth <= 0f)
             Die();
+
     }
 
     public void RestoreFullHealth()

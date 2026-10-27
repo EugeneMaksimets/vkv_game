@@ -1,4 +1,5 @@
 
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -27,6 +28,8 @@ public class PlayerMovement : MonoBehaviour
     public float JumpForce => _jumpForce;
 
     private float _horizontalInput;
+    private float _knockbackVelocityX;
+    private float _knockbackTimeReminging;
     private bool _isCrouching;
 
     private void Awake()
@@ -66,22 +69,71 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Отталкивает игрока в сторону от источника попадания.
+    /// </summary>
+    public void ApplyKnockback(
+        Vector2 sourcePosition,
+        float speed,
+        float duraction)
+    {
+        if (speed <= 0f || duraction <= 0f)
+            return;
+
+        float diffirenceX = Rb.position.x - sourcePosition.x;
+
+        // Враг слева — игрок летит вправо.
+        // Враг справа — игрок летит влево.
+        float direction = Mathf.Abs (diffirenceX) > 0.01f 
+            ? Mathf.Sign(diffirenceX) 
+            : transform.localScale.x >= 0f ? -1f : 1f;
+
+        _horizontalInput = 0f;
+        _knockbackVelocityX = direction * speed;
+        _knockbackTimeReminging = duraction;
+    }
+
     private void FixedUpdate()
     {
-        float speed = _isCrouching
-            ? _moveSpeed * _crouchSpeedMultiplier
-            : _moveSpeed;
+        float horizontalVelocity;
 
-        Rb.linearVelocity = new Vector2(
-            _horizontalInput * speed,
-            Rb.linearVelocity.y
-        );
+        if(_knockbackTimeReminging > 0f)
+        {
+            // Пока действует отбрасывание, ввод игрока не влияет на X-скорость.
+            horizontalVelocity = _knockbackVelocityX;
+            _knockbackTimeReminging -= Time.fixedDeltaTime;
+        }
+        else
+        {
+            float speed = _isCrouching
+                ? _moveSpeed * _crouchSpeedMultiplier
+                : _moveSpeed;
 
-        if (_useLevelBounds)
+            horizontalVelocity = _horizontalInput * speed;
+        }
+
+        Rb.linearVelocity = new Vector2(horizontalVelocity, Rb.linearVelocity.y);
+
+        if(_useLevelBounds)
         {
             Vector2 position = Rb.position;
             position.x = Mathf.Clamp(position.x, _minX, _maxX);
             Rb.position = position;
         }
+        // float speed = _isCrouching
+        //     ? _moveSpeed * _crouchSpeedMultiplier
+        //     : _moveSpeed;
+
+        // Rb.linearVelocity = new Vector2(
+        //     _horizontalInput * speed,
+        //     Rb.linearVelocity.y
+        // );
+
+        // if (_useLevelBounds)
+        // {
+        //     Vector2 position = Rb.position;
+        //     position.x = Mathf.Clamp(position.x, _minX, _maxX);
+        //     Rb.position = position;
+        // }
     }
 }

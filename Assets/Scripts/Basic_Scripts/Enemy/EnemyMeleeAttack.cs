@@ -8,13 +8,18 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyTarget))]
 public class EnemyMeleeAttack : MonoBehaviour
 {
+    [Header ("Knockback")]
+    [SerializeField] private float _knockbackSpeed = 4f;
+    [SerializeField] private float _knockbackDuraction = 0.12f;
+
+    [Header("DamageInfo")]
     [SerializeField] private float _damage = 1f;
     [SerializeField] private float _attackRange = 1.2f;
     [SerializeField] private float _attackCooldown = 1f;
     [SerializeField] private bool _attackAutomatically = true;
 
     public event Action<Transform> AttackStarted;
-    public event Action<IDamageable, float> DamageDealt;
+    public event Action<IDamageable, DamageInfo> DamageDealt;
 
     public bool IsTargetInRange
     {
@@ -66,7 +71,6 @@ public class EnemyMeleeAttack : MonoBehaviour
 
     public bool TryAttack()
     {
-        Debug.Log("TRY ATACK");
         if (!CanAttackNow)
             return false;
 
@@ -74,9 +78,17 @@ public class EnemyMeleeAttack : MonoBehaviour
         if (damageable == null)
             return false;
 
+        DamageInfo damageInfo = new DamageInfo(
+            _damage,
+            (Vector2)transform.position,
+            _knockbackSpeed,
+            _knockbackDuraction
+        );
+
         AttackStarted?.Invoke(_target.Target);
-        damageable.TakeDamage(_damage);
-        DamageDealt?.Invoke(damageable, _damage);
+        damageable.TakeDamage(damageInfo);
+        DamageDealt?.Invoke(damageable, damageInfo);
+
         _nextAttackTime = Time.time + _attackCooldown;
         return true;
     }
@@ -91,5 +103,7 @@ public class EnemyMeleeAttack : MonoBehaviour
         _damage = Mathf.Max(0f, _damage);
         _attackRange = Mathf.Max(0f, _attackRange);
         _attackCooldown = Mathf.Max(0.01f, _attackCooldown);
+        _knockbackSpeed = Mathf.Max(0f, _knockbackSpeed);
+        _knockbackDuraction = Mathf.Max(0f, _knockbackDuraction);
     }
 }

@@ -8,11 +8,16 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyHealth))]
 public class EnemyContactDamage : MonoBehaviour
 {
+    [Header("Knockback")]
+    [SerializeField] private float _knockbackSpeed = 4f;
+    [SerializeField] private float _knockbackDuration = 0.12f;
+
+    [Header("DamageInfo")]
     [SerializeField] private float _damage = 1f;
     [SerializeField] private float _damageInterval = 1f;
     [SerializeField] private string _targetTag = "Player";
 
-    public event Action<IDamageable, float> DamageDealt;
+    public event Action<IDamageable, DamageInfo> DamageDealt;
 
     private EnemyHealth _health;
     private float _nextDamageTime;
@@ -52,8 +57,15 @@ public class EnemyContactDamage : MonoBehaviour
         if (target == null)
             return;
 
-        target.TakeDamage(_damage);
-        DamageDealt?.Invoke(target, _damage);
+        DamageInfo damageInfo = new DamageInfo(
+            _damage,
+            (Vector2)transform.position,
+            _knockbackSpeed,
+            _knockbackDuration
+        );
+        target.TakeDamage(damageInfo);
+        DamageDealt?.Invoke(target, damageInfo);
+
         _nextDamageTime = Time.time + _damageInterval;
     }
 
@@ -66,5 +78,7 @@ public class EnemyContactDamage : MonoBehaviour
     {
         _damage = Mathf.Max(0f, _damage);
         _damageInterval = Mathf.Max(0.01f, _damageInterval);
+        _knockbackSpeed = Mathf.Max(0f, _knockbackSpeed);
+        _knockbackDuration = Mathf.Max(0f, _knockbackDuration);
     }
 }
