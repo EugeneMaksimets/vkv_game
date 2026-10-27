@@ -18,11 +18,16 @@ public class PlayerInteractState : IPlayerState
         if (_playerStateController.Interectable != null && 
             _playerStateController.Interectable.CurrentInteractable != null)
         {
+            if(_playerStateController.Interectable.CurrentTag == "pick_up_item")
+            {
+                Debug.Log("Try pick up");
+                _playerStateController.Animator.SetTrigger("PickUpItem");
+            }
             _playerStateController.Interectable.CurrentInteractable.Interact();
         }
 
         //TODO: change logic with animation
-            _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
+        _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
             
     }
 
@@ -32,6 +37,6 @@ public class PlayerInteractState : IPlayerState
 
     public void Exit()
     {
-
+        
     }
 }

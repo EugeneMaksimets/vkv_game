@@ -24,7 +24,7 @@ public class PlayerGetDamageState : IPlayerState
         // и вернёт исходный размер коллайдера.
         _playerStateController.StopMoving();
         _playerStateController.ApplyHitKnockback(_playerStateController.LastDamageInfo);
-        _playerStateController.PlayGetDamageAnimation();
+        _playerStateController.Animator.SetTrigger("GetDamage");
     } 
 
     public void UpdateState()

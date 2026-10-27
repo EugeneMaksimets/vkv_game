@@ -14,7 +14,7 @@ public class PlayerDieState : IPlayerState
     public void Enter()
     {
         _playerStateController.StopMoving();
-        _playerStateController.PlayDieAnimation();
+        _playerStateController.Animator.SetTrigger("Die");
     }
 
     public void UpdateState()

@@ -55,8 +55,6 @@ public class PlayerStateController : MonoBehaviour
 
     [Header("Health State Settings")]
     [SerializeField] private float _getDamageDuration = 0.25f;
-    [SerializeField] private string _getDamageTrigger = "GetDamage";
-    [SerializeField] private string _dieTrigger = "Die";
 
     public float GetDamageDuration => _getDamageDuration;
 
@@ -276,25 +274,6 @@ public class PlayerStateController : MonoBehaviour
         else
             Debug.Log("Nothing to use");
     }
-
-    /// <summary>
-    /// Небольшая анимация реакции на урон. В Animator нужен Trigger с именем GetDamage
-    /// или с именем, указанным в поле Get Damage Trigger компонента PlayerStateController.
-    /// </summary>
-    public void PlayGetDamageAnimation()
-    {
-        Animator.SetTrigger(_getDamageTrigger);
-    }
-
-    /// <summary>
-    /// Анимация смерти. В Animator нужен Trigger с именем Die
-    /// или с именем из поля Die Trigger компонента PlayerStateController.
-    /// </summary>
-    public void PlayDieAnimation()
-    {
-        Animator.SetTrigger(_dieTrigger);
-    }
-
     private void HandleDamaged(PlayerHealth health, DamageInfo damageInfo)
     {
         LastDamageInfo = damageInfo;
