@@ -11,7 +11,7 @@ public class PickUpedItem : MonoBehaviour, IInteractable
 
     [Header("Movement Settings")]
     [SerializeField] private float _moveSpeed = 5f;
-    [SerializeField] private int _sortingLayer = 10;
+    [SerializeField] private int _sortingOrder = 10;
     [SerializeField] private float _returnDelay = 1f;
 
     [Header("Scale Settings")]
@@ -22,8 +22,8 @@ public class PickUpedItem : MonoBehaviour, IInteractable
     private SpriteRenderer _spriteRenderer;
     private ItemState _currentState = ItemState.Idle;
     private float _waitTimer;
-    private bool _isCloseEnoughToTarget = false;
-    private bool _isScaleChanged = false;
+    private bool _isPositionReached = false;
+    private bool _isScaleReached = false;
 
     private void Awake()
     {
@@ -58,9 +58,9 @@ public class PickUpedItem : MonoBehaviour, IInteractable
         switch (_currentState)
         {
             case ItemState.MovingToCamera:
-                ChangePosition(_mainCamera.transform.position); // Change the scale to the target scale when moving to the camera center
-                _isCloseEnoughToTarget = IsCloseEnoughToTarget(_mainCamera.transform.position); 
-                if(_isCloseEnoughToTarget && _isScaleChanged)
+                ChangePosition(_mainCamera.transform.position); 
+                _isPositionReached = IsCloseEnoughToTarget(_mainCamera.transform.position); 
+                if(_isPositionReached && _isScaleReached)
                 {
                     ChangeState(ItemState.Waiting);
                 }
@@ -68,13 +68,12 @@ public class PickUpedItem : MonoBehaviour, IInteractable
 
             case ItemState.ReturningToPlayer:
                 ChangePosition(_playerItemHolder.position); // Return to the player item holder position
-                _isCloseEnoughToTarget = IsCloseEnoughToTarget(_playerItemHolder.position); 
-                if(_isCloseEnoughToTarget && _isScaleChanged)
+                _isPositionReached = IsCloseEnoughToTarget(_playerItemHolder.position); 
+                if(_isPositionReached && _isScaleReached)
                 {
                     ChangeState(ItemState.Destroy);
                 }
                 break;
-
             case ItemState.Waiting:
                 WaitBeforeReturn();
                 break;
@@ -98,12 +97,12 @@ public class PickUpedItem : MonoBehaviour, IInteractable
         {
             case ItemState.MovingToCamera:
                 ChangeScale(_targetScale); // Change the scale to the target scale when moving to the camera center
-                _isScaleChanged = IsScaleChanged(_targetScale);
+                _isScaleReached = IsScaleReached(_targetScale);
                 break;
 
             case ItemState.ReturningToPlayer:
                 ChangeScale(_finalScale); // Change the scale to the final scale while returning to the player
-                _isScaleChanged = IsScaleChanged(_finalScale);
+                _isScaleReached = IsScaleReached(_finalScale);
                 break;
 
             default:
@@ -124,24 +123,25 @@ public class PickUpedItem : MonoBehaviour, IInteractable
             return;
         }
 
-        _currentState = ItemState.MovingToCamera;
-        _spriteRenderer.sortingOrder = _sortingLayer;
+        ChangeState(ItemState.MovingToCamera);
+        _spriteRenderer.sortingOrder = _sortingOrder;
     }
 
-    private void ChangeState(ItemState state)
+    private void ChangeState(ItemState newState)
     {
-       
-        if (_currentState != state && _isCloseEnoughToTarget && _isScaleChanged) // Only change state if the item is close enough to the target position
+        if (_currentState == newState)
         {
-            _currentState = state;
-            _waitTimer = 0f;
+            return;
         }
 
-        if (state == ItemState.MovingToCamera ||
-            state == ItemState.ReturningToPlayer)
+        _currentState = newState;
+        _waitTimer = 0f;
+
+        if (newState == ItemState.MovingToCamera ||
+            newState == ItemState.ReturningToPlayer)
         {
-            _isCloseEnoughToTarget = false;
-            _isScaleChanged = false;
+            _isPositionReached = false;
+            _isScaleReached = false;
         }
     }
 
@@ -150,17 +150,15 @@ public class PickUpedItem : MonoBehaviour, IInteractable
         return Vector2.Distance(_rb.position, targetPosition) < threshold;
     }
 
-    private bool IsScaleChanged(Vector3 targetScale, float threshold = 0.01f)
+    private bool IsScaleReached(Vector3 targetScale, float threshold = 0.01f)
     {
         return Vector3.Distance(transform.localScale, targetScale) < threshold;
     }
 
     private void ChangePosition(Vector3 targetPosition)
     {
-        
-        targetPosition.z = transform.position.z; // Keep the item's z position unchanged
-        Vector3 newPosition = Vector3.MoveTowards(
-            transform.position, 
+        Vector2 newPosition = Vector2.MoveTowards(
+            _rb.position, 
             targetPosition, 
             _moveSpeed * Time.fixedDeltaTime
         );
