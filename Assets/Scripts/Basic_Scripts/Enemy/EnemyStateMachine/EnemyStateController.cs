@@ -14,12 +14,7 @@ public class EnemyStateController : MonoBehaviour
     [SerializeField] private float _attackDuration = 0.5f;
     [SerializeField] private float _attackDamageTime = 0.25f;
     [SerializeField] private float _getDamageDuration = 0.25f;
-    [SerializeField] private bool _canMove = false;
-    public bool CanMove
-    {
-        get => _canMove;
-        set => _canMove = value;
-    }
+    
 
     [Header("Animator Parameters")]
     [SerializeField] private string _speedParameter = "Speed";
@@ -30,7 +25,6 @@ public class EnemyStateController : MonoBehaviour
     public Animator Animator { get; private set; }
     public EnemyHealth Health { get; private set; }
     public EnemyTarget Target { get; private set; }
-    // public EnemyMeleeAttack MeleeAttack { get; private set; }
     public Enemy Enemy {get; private set;}
     public EnemyMovement Movement { get; private set; }
 
@@ -56,11 +50,6 @@ public class EnemyStateController : MonoBehaviour
         Target = GetComponent<EnemyTarget>();
         Enemy = GetComponent<Enemy>();
         Movement = GetComponent<EnemyMovement>();
-
-        // Атаку запускает состояние Attack, а не EnemyMeleeAttack.Update().
-        // MeleeAttack.SetAutomaticAttack(false);
-        Enemy.SetAutomaticAttack(false);
-        
 
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this);
@@ -103,7 +92,7 @@ public class EnemyStateController : MonoBehaviour
         {
             StateMachine.ChangeState(AttackState);
         }
-        else if (HasTarget && !IsTargetInAttackRange() && _canMove)
+        else if (HasTarget && !IsTargetInAttackRange() && Movement.CanMove)
         {
             StateMachine.ChangeState(WalkState);
         }

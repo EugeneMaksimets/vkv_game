@@ -16,9 +16,11 @@ public class EnemyAttackState : IEnemyState
 
     public void Enter()
     {
-        if (!_controller.CanMove)
+        if (_controller.HasTarget)
         {
-           _controller.Movement.FaceTarget(_controller.Target.Target); 
+            _controller.Movement.FaceTarget(
+                _controller.Target.Target
+            );
         }
         _timer = 0f;
         _damageAttempted = false;
@@ -33,7 +35,6 @@ public class EnemyAttackState : IEnemyState
 
         if (!_damageAttempted && _timer >= _controller.AttackDamageTime)
         {
-            // _controller.MeleeAttack.TryAttack();
             _controller.Enemy.TryAttack();
             _damageAttempted = true;
         }

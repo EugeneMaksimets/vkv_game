@@ -4,15 +4,14 @@ using UnityEngine;
 /// <summary>
 /// Выполняет удар по цели EnemyTarget, когда она находится в радиусе атаки.
 /// </summary>
-[RequireComponent(typeof(EnemyHealth))]
-[RequireComponent(typeof(EnemyTarget))]
+
+[RequireComponent(typeof(MeleeWeapon))]
 public class EnemyMelee : Enemy
 {
 
     [Header("Attack Settings")]
     [SerializeField] private float _attackRange = 1.2f;
     [SerializeField] private float _attackCooldown = 1f;
-    [SerializeField] private bool _attackAutomatically = true;
 
     public event Action<Transform> AttackStarted;
 
@@ -25,47 +24,25 @@ public class EnemyMelee : Enemy
 
         _meleeWeapon = GetComponent<MeleeWeapon>();
     }
-
-    private void OnEnable()
-    {
-        Health.Died += DisableAttack;
-    }
-
-    private void OnDisable()
-    {
-        Health.Died -= DisableAttack;
-    }
-
-    private void Update()
-    {
-        if (_attackAutomatically)
-            TryAttack();
-    }
-
-    override public void SetAutomaticAttack(bool value)
-    {
-        _attackAutomatically = value;
-    }
-
     override public void TryAttack()
     {
         if (!CanAttackNow())
             return;
 
         Transform targetTransform = Target.Target;
+
         AttackStarted?.Invoke(targetTransform);
 
-        if (_meleeWeapon.IsWeaponReady(targetTransform, targetTransform.position))
-        {
-            _meleeWeapon.Attack(targetTransform);
-        }
+        bool attackSucceeded = _meleeWeapon.Attack(
+        targetTransform,
+        transform.position
+        );
+
+        if (!attackSucceeded)
+            return;
+
         _nextAttackTime = Time.time + _attackCooldown;
 
-    }
-
-    private void DisableAttack(EnemyHealth health)
-    {
-        enabled = false;
     }
 
     private void OnValidate()

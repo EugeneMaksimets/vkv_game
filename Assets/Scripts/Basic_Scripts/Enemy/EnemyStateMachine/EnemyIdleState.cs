@@ -18,7 +18,7 @@ public class EnemyIdleState : IEnemyState
 
     public void UpdateState()
     {
-        if (!_controller.CanMove)
+        if (!_controller.Movement.CanMove)
         {
            _controller.Movement.FaceTarget(_controller.Target.Target); 
         }

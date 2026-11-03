@@ -8,6 +8,13 @@ public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed = 2f;
 
+    [SerializeField] private bool _canMove = false;
+    public bool CanMove
+    {
+        get => _canMove;
+        set => _canMove = value;
+    }
+
     public float MoveSpeed => _moveSpeed;
     public bool IsMoving => Mathf.Abs(_direction) > 0.01f;
 
