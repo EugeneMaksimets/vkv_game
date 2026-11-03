@@ -33,7 +33,8 @@ public class EnemyAttackState : IEnemyState
 
         if (!_damageAttempted && _timer >= _controller.AttackDamageTime)
         {
-            _controller.MeleeAttack.TryAttack();
+            // _controller.MeleeAttack.TryAttack();
+            _controller.Enemy.TryAttack();
             _damageAttempted = true;
         }
 

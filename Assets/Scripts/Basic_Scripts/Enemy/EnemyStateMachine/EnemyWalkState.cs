@@ -17,7 +17,7 @@ public class EnemyWalkState : IEnemyState
 
     public void UpdateState()
     {
-        if (!_controller.HasTarget || _controller.IsTargetInAttackRange)
+        if (!_controller.HasTarget || _controller.IsTargetInAttackRange())
         {
             _controller.ChooseIdleWalkOrAttackState();
             return;

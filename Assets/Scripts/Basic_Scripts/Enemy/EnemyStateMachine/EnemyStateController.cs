@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(EnemyTarget))]
-[RequireComponent(typeof(EnemyMeleeAttack))]
+[RequireComponent(typeof(Enemy))]
 [RequireComponent(typeof(EnemyMovement))]
 public class EnemyStateController : MonoBehaviour
 {
@@ -30,15 +30,17 @@ public class EnemyStateController : MonoBehaviour
     public Animator Animator { get; private set; }
     public EnemyHealth Health { get; private set; }
     public EnemyTarget Target { get; private set; }
-    public EnemyMeleeAttack MeleeAttack { get; private set; }
+    // public EnemyMeleeAttack MeleeAttack { get; private set; }
+    public Enemy Enemy {get; private set;}
     public EnemyMovement Movement { get; private set; }
 
     public float AttackDuration => _attackDuration;
     public float AttackDamageTime => _attackDamageTime;
     public float GetDamageDuration => _getDamageDuration;
     public bool HasTarget => Target.Target != null;
-    public bool IsTargetInAttackRange => MeleeAttack.IsTargetInRange;
-    public bool CanAttackNow => MeleeAttack.CanAttackNow;
+
+    public bool IsTargetInAttackRange() => Enemy.IsTargetInRange();
+    public bool CanAttackNow => Enemy.CanAttackNow();
 
     public EnemyStateMachine StateMachine { get; private set; }
     public EnemyIdleState IdleState { get; private set; }
@@ -52,11 +54,13 @@ public class EnemyStateController : MonoBehaviour
         Animator = GetComponent<Animator>();
         Health = GetComponent<EnemyHealth>();
         Target = GetComponent<EnemyTarget>();
-        MeleeAttack = GetComponent<EnemyMeleeAttack>();
+        Enemy = GetComponent<Enemy>();
         Movement = GetComponent<EnemyMovement>();
 
         // Атаку запускает состояние Attack, а не EnemyMeleeAttack.Update().
-        MeleeAttack.SetAutomaticAttack(false);
+        // MeleeAttack.SetAutomaticAttack(false);
+        Enemy.SetAutomaticAttack(false);
+        
 
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this);
@@ -99,7 +103,7 @@ public class EnemyStateController : MonoBehaviour
         {
             StateMachine.ChangeState(AttackState);
         }
-        else if (HasTarget && !IsTargetInAttackRange && _canMove)
+        else if (HasTarget && !IsTargetInAttackRange() && _canMove)
         {
             StateMachine.ChangeState(WalkState);
         }
