@@ -6,7 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(EnemyTarget))]
-[RequireComponent(typeof(Enemy))]
 [RequireComponent(typeof(EnemyMovement))]
 public class EnemyStateController : MonoBehaviour
 {
@@ -48,8 +47,19 @@ public class EnemyStateController : MonoBehaviour
         Animator = GetComponent<Animator>();
         Health = GetComponent<EnemyHealth>();
         Target = GetComponent<EnemyTarget>();
-        Enemy = GetComponent<Enemy>();
         Movement = GetComponent<EnemyMovement>();
+        Enemy = GetComponent<Enemy>();
+
+        if (Enemy == null)
+        {
+            Debug.LogError(
+                $"{nameof(EnemyStateController)} requires a component derived from Enemy.",
+                this
+            );
+
+            enabled = false;
+            return;
+        }
 
         StateMachine = new EnemyStateMachine();
         IdleState = new EnemyIdleState(this);
