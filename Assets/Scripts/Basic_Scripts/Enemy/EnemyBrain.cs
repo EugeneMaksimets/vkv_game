@@ -70,7 +70,7 @@ public class EnemyBrain : MonoBehaviour
 
     private void Update()
     {
-        if (_stateMachine == null || _stateFactory == null)
+        if (_stateMachine == null || _stateFactory == null || _stateMachine.CurrentState == null)
         {
             return;
         }
@@ -112,19 +112,17 @@ public class EnemyBrain : MonoBehaviour
             ChangeState(_stateFactory.IdleState);
             return;
         }
-        if(_enemy.IsTargetInRange())
+        if (_enemy.CanAttackNow())
         {
-            if(_enemy.CanAttackNow())
-            {
-                ChangeState(_stateFactory.AttackState);
-            }
-            else
-            {
-                ChangeState(_stateFactory.IdleState);
-            }
+            ChangeState(_stateFactory.AttackState);
             return;
         }
-        if (_movement.CanMove)
+
+        if (_enemy.IsTargetInRange())
+        {
+            return;
+        }
+        if (_movement.CanEnterWalkState)
         {
             ChangeState(_stateFactory.WalkState);
             return;
@@ -134,6 +132,7 @@ public class EnemyBrain : MonoBehaviour
 
     private void UpdateAttackState()
     {
+        
         _stateTimer += Time.deltaTime;
 
         if (!_damageAttempted && _stateTimer >= _attackDamageTime)
@@ -144,8 +143,16 @@ public class EnemyBrain : MonoBehaviour
 
         if (_stateTimer >= _attackDuration)
         {
+            if (_enemy.CanAttackNow())
+            {
+                ResetTimer();
+                _stateMachine.RestartCurrentState();
+                return;
+            }
+
             EvaluateNextState();
         }
+                
     }
 
     private void UpdateGetDamageState()

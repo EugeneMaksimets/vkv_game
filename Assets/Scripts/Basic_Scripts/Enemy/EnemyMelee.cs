@@ -1,23 +1,36 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
-[RequireComponent(typeof(MeleeWeapon))]
 public class EnemyMelee : Enemy
 {
     [Header("Attack Settings")]
     [SerializeField] private float _attackRange = 2.5f;
     [SerializeField] private float _attackCooldown = 1f;
 
+    [Header("Weapon")]
+    [SerializeField] private MeleeWeapon _meleeWeapon;
+
     public event Action<Transform> AttackStarted;
 
-    private MeleeWeapon _meleeWeapon;
     private float _nextAttackTime;
 
     protected override void Awake()
     {
         base.Awake();
 
-        _meleeWeapon = GetComponent<MeleeWeapon>();
+        if(_meleeWeapon == null)
+        {
+            _meleeWeapon = GetComponentInChildren<MeleeWeapon>(true);
+        }
+        
+        if (_meleeWeapon == null)
+        {
+            Debug.LogError("MeleeWeapon not found!", this);
+            enabled = false;
+            return;
+        }
+            
     }
 
     public override void TryAttack()
@@ -27,14 +40,14 @@ public class EnemyMelee : Enemy
 
         Transform targetTransform = Target.TargetTransform;
 
-        AttackStarted?.Invoke(targetTransform);
-
         bool attackSucceeded = _meleeWeapon.Attack(
             targetTransform,
             transform.position);
 
         if (!attackSucceeded)
             return;
+
+        AttackStarted?.Invoke(targetTransform);
 
         _nextAttackTime = Time.time + _attackCooldown;
     }
