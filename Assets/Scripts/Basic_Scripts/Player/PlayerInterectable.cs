@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PlayerInterectable : MonoBehaviour
 {
+    // Tracks all interactable colliders currently inside the player's interaction range.
     private readonly Dictionary<Collider2D, IInteractable> _interactables = 
         new Dictionary<Collider2D, IInteractable>();
     public IInteractable CurrentInteractable => GetClosestInteractable();
@@ -19,13 +20,10 @@ public class PlayerInterectable : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (_interactables.ContainsKey(other))
-        {
-            _interactables.Remove(other);
-        }
-
+        _interactables.Remove(other);
     }
 
+    // Returns the closest interactable to ensure the player interacts with the most relevant object.
     private IInteractable GetClosestInteractable() {
         IInteractable closestInteractable = null;
         float closestDistanceSqr = float.MaxValue;
@@ -33,6 +31,7 @@ public class PlayerInterectable : MonoBehaviour
         foreach (KeyValuePair<Collider2D, IInteractable> entry in _interactables)
         {
             Collider2D collider = entry.Key;
+            // Use the closest point on the collider instead of its center.
             Vector2 closestPoint = collider.ClosestPoint(transform.position);
 
             float distanceSqr = 
