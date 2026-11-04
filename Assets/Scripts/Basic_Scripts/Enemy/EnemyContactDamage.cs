@@ -69,7 +69,7 @@ public class EnemyContactDamage : MonoBehaviour
         _nextDamageTime = Time.time + _damageInterval;
     }
 
-    private void DisableDamage(EnemyHealth health)
+    private void DisableDamage()
     {
         enabled = false;
     }

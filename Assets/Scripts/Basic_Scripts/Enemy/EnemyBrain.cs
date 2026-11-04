@@ -23,6 +23,24 @@ public class EnemyBrain : MonoBehaviour
     private float _stateTimer;
     private bool _damageAttempted;
 
+    private void OnEnable()
+    {
+        if(_health == null)
+            return;
+
+        _health.Damaged += OnDamaged;
+        _health.Died += OnDied;
+    }
+
+    private void OnDisable()
+    {
+        if(_health == null)
+            return;
+
+        _health.Damaged -= OnDamaged;
+        _health.Died -= OnDied;
+    }
+
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
@@ -37,26 +55,32 @@ public class EnemyBrain : MonoBehaviour
                 $"{nameof(EnemyBrain)} requires a component derived from Enemy.",
                 this
             );
+            enabled = false;
+            return;
         }
+
+        
     }
 
     private void Start()
     {
-        _stateMachine = new EnemyStateMachine();
-        _stateFactory = new EnemyStateFactory(_movement, _target, _animation);
-
-        _stateMachine.Initialize(_stateFactory.IdleState);
+        InitializeStateMachine();
     }
+
 
     private void Update()
     {
+        if (_stateMachine == null || _stateFactory == null)
+        {
+            return;
+        }
         _stateMachine.CurrentState.UpdateState();
 
         if(_stateMachine.CurrentState == _stateFactory.AttackState)
         {
             UpdateAttackState();
         }
-        else if (_stateMachine.CurrentState == _stateFactory.GetDamageState)
+        else if (_stateMachine.CurrentState == _stateFactory.DamagedState)
         {
             UpdateGetDamageState();
         }
@@ -67,8 +91,22 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
+    private void InitializeStateMachine()
+    {
+        _stateMachine = new EnemyStateMachine();
+
+        _stateFactory = new EnemyStateFactory(_movement, _target, _animation);
+        _stateMachine.Initialize(_stateFactory.IdleState);
+    }
+
     private void EvaluateNextState()
     {
+        if(_health.IsDead)
+        {
+            ChangeState(_stateFactory.DieState);
+            return;
+        }
+
         if(_target.TargetTransform == null)
         {
             ChangeState(_stateFactory.IdleState);
@@ -122,12 +160,41 @@ public class EnemyBrain : MonoBehaviour
 
     private void ChangeState(IEnemyState newState)
     {
+        if (_stateMachine.CurrentState is EnemyDieState)
+            return;
+
         if (_stateMachine.CurrentState == newState)
             return;
         
+        ResetTimer();
+
+        _stateMachine.ChangeState(newState);
+    }
+
+    private void ResetTimer()
+    {
         _stateTimer = 0f;
         _damageAttempted = false;
-        _stateMachine.ChangeState(newState);
+    }
+
+    private void OnDamaged()
+    {
+        if(_health.IsDead)
+            return;
+
+        if(_stateMachine.CurrentState == _stateFactory.DamagedState)
+        {
+            _stateMachine.RestartCurrentState();
+            ResetTimer();
+            return;
+        }
+
+        ChangeState(_stateFactory.DamagedState);
+    }
+
+    private void OnDied()
+    {
+        ChangeState(_stateFactory.DieState);
     }
 
     private void OnValidate()

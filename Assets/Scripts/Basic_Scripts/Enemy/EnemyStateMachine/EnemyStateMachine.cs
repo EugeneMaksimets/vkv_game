@@ -25,4 +25,13 @@ public class EnemyStateMachine
     {
         CurrentState?.UpdateState();
     }
+
+    public void RestartCurrentState()
+    {
+        if (CurrentState == null)
+            return;
+
+        CurrentState.Exit();
+        CurrentState.Enter();
+    }
 }

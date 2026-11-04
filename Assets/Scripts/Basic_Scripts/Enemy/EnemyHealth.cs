@@ -14,8 +14,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsDead { get; private set; }
 
     public event Action<EnemyHealth, float> HealthChanged;
-    public event Action<EnemyHealth, DamageInfo> Damaged;
-    public event Action<EnemyHealth> Died;
+    public event Action Damaged;
+    public event Action Died;
 
     private void Awake()
     {
@@ -38,7 +38,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         DamageInfo appliedDamageInfo = damageInfo.WithAmount(appliedDamage);
 
         HealthChanged?.Invoke(this, CurrentHealth);
-        Damaged?.Invoke(this, appliedDamageInfo);
+        Damaged?.Invoke();
 
         if (CurrentHealth <= 0f)
             Die();
@@ -57,7 +57,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private void Die()
     {
         IsDead = true;
-        Died?.Invoke(this);
+        Died?.Invoke();
 
         if (_destroyGameObjectOnDeath)
             Destroy(gameObject);
