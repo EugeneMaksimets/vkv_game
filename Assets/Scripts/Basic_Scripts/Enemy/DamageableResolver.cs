@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Находит IDamageable на объекте столкновения или его родителях.
+/// Finds a component that implements the IDamageable interface in the target's hierarchy.
 /// </summary>
 public static class DamageableResolver
 {

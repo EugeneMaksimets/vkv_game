@@ -1,20 +1,20 @@
 using UnityEngine;
 
 /// <summary>
-/// Находит и хранит текущую цель врага. По умолчанию это объект с тегом Player.
+/// Finds and stores the target for the enemy, typically the player. It searches for a GameObject with a specific tag and keeps a reference to its Transform.
 /// </summary>
 public class EnemyTarget : MonoBehaviour
 {
     [SerializeField] private string _targetTag = "Player";
     [SerializeField] private float _searchInterval = 1f;
 
-    public Transform Target { get; private set; }
+    public Transform TargetTransform { get; private set; }
 
     private float _nextSearchTime;
 
     private void Update()
     {
-        if (Target != null || Time.time < _nextSearchTime)
+        if (TargetTransform != null || Time.time < _nextSearchTime)
             return;
 
         FindTarget();
@@ -22,12 +22,12 @@ public class EnemyTarget : MonoBehaviour
 
     public void SetTarget(Transform target)
     {
-        Target = target;
+        TargetTransform = target;
     }
 
     public void ClearTarget()
     {
-        Target = null;
+        TargetTransform = null;
     }
 
     private void FindTarget()
@@ -36,7 +36,7 @@ public class EnemyTarget : MonoBehaviour
 
         GameObject targetObject = GameObject.FindWithTag(_targetTag);
         if (targetObject != null)
-            Target = targetObject.transform;
+            TargetTransform = targetObject.transform;
     }
 
     private void OnValidate()

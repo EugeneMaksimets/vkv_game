@@ -1,5 +1,5 @@
 /// <summary>
-/// Хранит текущее состояние врага и выполняет переходы между состояниями.
+/// Manages the current state of the enemy and handles transitions between states.
 /// </summary>
 public class EnemyStateMachine
 {

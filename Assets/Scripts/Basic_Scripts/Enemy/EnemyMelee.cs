@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Выполняет удар по цели EnemyTarget, когда она находится в радиусе атаки.
+/// Atacking enemy that uses a melee weapon to damage the player. It checks if the player is within attack range and manages attack cooldowns.
 /// </summary>
 
 [RequireComponent(typeof(MeleeWeapon))]
@@ -10,7 +10,7 @@ public class EnemyMelee : Enemy
 {
 
     [Header("Attack Settings")]
-    [SerializeField] private float _attackRange = 1.2f;
+    [SerializeField] private float _attackRange = 2.5f;
     [SerializeField] private float _attackCooldown = 1f;
 
     public event Action<Transform> AttackStarted;
@@ -29,7 +29,7 @@ public class EnemyMelee : Enemy
         if (!CanAttackNow())
             return;
 
-        Transform targetTransform = Target.Target;
+        Transform targetTransform = Target.TargetTransform;
 
         AttackStarted?.Invoke(targetTransform);
 
@@ -54,11 +54,11 @@ public class EnemyMelee : Enemy
     override public bool IsTargetInRange()
     {
         
-        if (Target == null || Target.Target == null)
+        if (Target == null || Target.TargetTransform == null)
             return false;
 
         float rangeSquared = _attackRange * _attackRange;
-        return ((Vector2)(Target.Target.position - transform.position)).sqrMagnitude <= rangeSquared;
+        return ((Vector2)(Target.TargetTransform.position - transform.position)).sqrMagnitude <= rangeSquared;
         
     }
 

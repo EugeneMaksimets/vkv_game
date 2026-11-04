@@ -1,20 +1,19 @@
-/// <summary>
-/// Останавливает врага и запускает анимацию смерти.
-/// </summary>
 public class EnemyDieState : IEnemyState
 {
-    private readonly EnemyStateController _controller;
+    private readonly EnemyMovement _movement;
+    private readonly EnemyAnimation _animation;
 
-    public EnemyDieState(EnemyStateController controller)
+    public EnemyDieState(EnemyMovement movement, EnemyAnimation animation)
     {
-        _controller = controller;
+        _movement = movement;
+        _animation = animation;
     }
 
     public void Enter()
     {
-        _controller.Movement.Stop();
-        _controller.SetMoveAnimation(false);
-        _controller.PlayDieAnimation();
+        _movement.Stop();
+        _animation.PlayMoveAnimation(false);
+        _animation.PlayDieAnimation();
     }
 
     public void UpdateState()

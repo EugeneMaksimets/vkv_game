@@ -1,34 +1,29 @@
-/// <summary>
-/// Враг идёт к цели, пока та не окажется в радиусе атаки.
-/// </summary>
 public class EnemyWalkState : IEnemyState
 {
-    private readonly EnemyStateController _controller;
+    private readonly EnemyMovement _movement;
+    private readonly EnemyTarget _target;
+    private readonly EnemyAnimation _animation;
 
-    public EnemyWalkState(EnemyStateController controller)
+    public EnemyWalkState(EnemyMovement movement, EnemyTarget target, EnemyAnimation animation)
     {
-        _controller = controller;
+        _movement = movement;
+        _target = target;
+        _animation = animation;
     }
 
     public void Enter()
     {
-        _controller.SetMoveAnimation(true);
+        _animation.PlayMoveAnimation(true);
     }
 
     public void UpdateState()
     {
-        if (!_controller.HasTarget || _controller.IsTargetInAttackRange())
-        {
-            _controller.ChooseIdleWalkOrAttackState();
-            return;
-        }
-
-        _controller.Movement.MoveTowards(_controller.Target.Target);
+        _movement.MoveTowards(_target.TargetTransform);
     }
 
     public void Exit()
     {
-        _controller.Movement.Stop();
-        _controller.SetMoveAnimation(false);
+        _movement.Stop();
+        _animation.PlayMoveAnimation(false);
     }
 }

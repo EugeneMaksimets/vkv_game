@@ -1,28 +1,22 @@
-/// <summary>
-/// Враг ждёт, пока не появится цель вне радиуса атаки или возможность ударить.
-/// </summary>
 public class EnemyIdleState : IEnemyState
 {
-    private readonly EnemyStateController _controller;
+    private readonly EnemyMovement _movement;
+    private readonly EnemyAnimation _animation;
 
-    public EnemyIdleState(EnemyStateController controller)
+    public EnemyIdleState(EnemyMovement movement, EnemyAnimation animation)
     {
-        _controller = controller;
+        _movement = movement;
+        _animation = animation;
     }
 
     public void Enter()
     {
-        _controller.Movement.Stop();
-        _controller.SetMoveAnimation(false);
+        _movement.Stop();
+        _animation.PlayMoveAnimation(false);
     }
 
     public void UpdateState()
     {
-        if (!_controller.Movement.CanMove)
-        {
-           _controller.Movement.FaceTarget(_controller.Target.Target); 
-        }
-        _controller.ChooseIdleWalkOrAttackState();
     }
 
     public void Exit()
