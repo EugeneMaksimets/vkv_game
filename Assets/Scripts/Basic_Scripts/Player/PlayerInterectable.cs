@@ -3,46 +3,141 @@ using UnityEngine;
 
 public class PlayerInterectable : MonoBehaviour
 {
-    // Tracks all interactable colliders currently inside the player's interaction range.
-    private readonly Dictionary<Collider2D, IInteractable> _interactables = 
-        new Dictionary<Collider2D, IInteractable>();
+    [Header("Cleanup")]
+    // Timer for clean interactable object
+    [SerializeField, Min(0.1f)] private float _cleanupInterval = 0.5f;
+    private float _cleanupTimer;
+    // Tracks all interactable Colliders currently inside the player's interaction range.
+    private readonly Dictionary<IInteractable, HashSet<Collider2D>> _interactables = new();
+    private readonly List<IInteractable> _invalidInteractables = new();
+    private readonly List<Collider2D> _invalidColliders = new();
     public IInteractable CurrentInteractable => GetClosestInteractable();
     public string CurrentTag => (CurrentInteractable as MonoBehaviour)?.tag;
 
+
+    private void Update()
+    {
+        _cleanupTimer += Time.deltaTime;
+
+        if (_cleanupTimer < _cleanupInterval)
+        {
+            return;
+        }
+
+        _cleanupTimer = 0f;
+        CleanupInvalidInteractables();
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.TryGetComponent<IInteractable>(out var interactable))
+        if (!other.TryGetComponent<IInteractable>(out var interactable))
         {
-            _interactables[other] = interactable;
-
+            return;
         }
+
+        if (!_interactables.TryGetValue(interactable, out var colliders))
+        {
+            colliders = new HashSet<Collider2D>();
+            _interactables.Add(interactable, colliders);
+        }
+
+        colliders.Add(other);
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        _interactables.Remove(other);
+        if (!other.TryGetComponent<IInteractable>(out var interactable))
+        {
+            return;
+        }
+
+        if(!_interactables.TryGetValue(interactable, out var colliders))
+        {
+            return;
+        }
+
+        colliders.Remove(other);
+
+        if(colliders.Count == 0)
+        {
+            _interactables.Remove(interactable);
+        }
     }
 
     // Returns the closest interactable to ensure the player interacts with the most relevant object.
-    private IInteractable GetClosestInteractable() {
+    private IInteractable GetClosestInteractable()
+    {
         IInteractable closestInteractable = null;
-        float closestDistanceSqr = float.MaxValue;
+        float closestDistance = float.MaxValue;
 
-        foreach (KeyValuePair<Collider2D, IInteractable> entry in _interactables)
+        Vector2 playerPosition = transform.position;
+
+        foreach (var pair in _interactables)
         {
-            Collider2D collider = entry.Key;
-            // Use the closest point on the collider instead of its center.
-            Vector2 closestPoint = collider.ClosestPoint(transform.position);
+            IInteractable interactable = pair.Key;
+            HashSet<Collider2D> colliders = pair.Value;
 
-            float distanceSqr = 
-                ((Vector2)transform.position - closestPoint).sqrMagnitude;
-
-            if (distanceSqr < closestDistanceSqr)
+            foreach (Collider2D collider in colliders)
             {
-                closestDistanceSqr = distanceSqr;
-                closestInteractable = entry.Value;
+                if (collider == null)
+                {
+                    continue;
+                }
+
+                Vector2 closestPoint = collider.ClosestPoint(playerPosition);
+                float distance = Vector2.Distance(playerPosition, closestPoint);
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestInteractable = interactable;
+                }
             }
         }
+
         return closestInteractable;
     }
+    
+    private void CleanupInvalidInteractables()
+    {
+        _invalidInteractables.Clear();
+
+        foreach (var pair in _interactables)
+        {
+            IInteractable interactable = pair.Key;
+            HashSet<Collider2D> colliders = pair.Value;
+            // IInteractable is a interface need cast to object 
+            if ((interactable as UnityEngine.Object) == null)
+            {
+                _invalidInteractables.Add(interactable);
+                continue;
+            }
+
+            _invalidColliders.Clear();
+
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider == null)
+                {
+                    _invalidColliders.Add(collider);
+                }
+            }
+
+            foreach (Collider2D invalidCollider in _invalidColliders)
+            {
+                colliders.Remove(invalidCollider);
+            }
+
+            if (colliders.Count == 0)
+            {
+                _invalidInteractables.Add(interactable);
+            }
+        }
+
+        foreach (IInteractable interactable in _invalidInteractables)
+        {
+            _interactables.Remove(interactable);
+        }
+    }
+
 }
