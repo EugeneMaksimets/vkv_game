@@ -11,21 +11,17 @@ public class PlayerInterectable : MonoBehaviour
     private readonly Dictionary<IInteractable, HashSet<Collider2D>> _interactables = new();
     private readonly List<IInteractable> _invalidInteractables = new();
     private readonly List<Collider2D> _invalidColliders = new();
-    public IInteractable CurrentInteractable => GetClosestInteractable();
+    private IInteractable _currentInteractable;
+    public IInteractable CurrentInteractable => _currentInteractable;
     public string CurrentTag => (CurrentInteractable as MonoBehaviour)?.tag;
 
 
     private void Update()
     {
-        _cleanupTimer += Time.deltaTime;
-
-        if (_cleanupTimer < _cleanupInterval)
-        {
-            return;
-        }
-
-        _cleanupTimer = 0f;
+        UpdateCleanupTimer();
+        
         CleanupInvalidInteractables();
+        _currentInteractable = GetClosestInteractable();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -76,6 +72,8 @@ public class PlayerInterectable : MonoBehaviour
         {
             IInteractable interactable = pair.Key;
             HashSet<Collider2D> colliders = pair.Value;
+            if ((interactable as UnityEngine.Object) == null)
+                continue;
 
             foreach (Collider2D collider in colliders)
             {
@@ -85,7 +83,7 @@ public class PlayerInterectable : MonoBehaviour
                 }
 
                 Vector2 closestPoint = collider.ClosestPoint(playerPosition);
-                float distance = Vector2.Distance(playerPosition, closestPoint);
+                float distance = (playerPosition - closestPoint).sqrMagnitude;
 
                 if (distance < closestDistance)
                 {
@@ -138,6 +136,22 @@ public class PlayerInterectable : MonoBehaviour
         {
             _interactables.Remove(interactable);
         }
+        if (_currentInteractable != null &&
+            !_interactables.ContainsKey(_currentInteractable))
+        {   
+            _currentInteractable = null;
+        }   
+    }
+    private void UpdateCleanupTimer()
+    {
+        _cleanupTimer += Time.deltaTime;
+
+        if (_cleanupTimer < _cleanupInterval)
+        {
+            return;
+        }
+
+        _cleanupTimer = 0f;
     }
 
 }
