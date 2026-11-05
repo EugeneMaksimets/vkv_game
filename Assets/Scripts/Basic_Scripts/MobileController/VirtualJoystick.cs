@@ -77,10 +77,10 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             if (x < -_deadZone)
             {
                 _inputVector.x = -1f;
-                if(_playerBrain != null) _playerBrain.SetMoveLeft();
+
                 // Спрайт влево (индекс 3)
-                if (_joystickSprites.Length > 3 && _joystickSprites[3] != null) 
-                    _joystickImage.sprite = _joystickSprites[3];
+
+                _joystickImage.sprite = _joystickSprites[3];
             }
             else if (x > _deadZone)
             {
@@ -130,24 +130,31 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
         }
     }
 
+    // private void ApplyInput()
+    // {
+    //     if (_playerBrain == null) return;
+
+    //     if (_inputVector.x > 0)
+    //     {
+    //         _playerBrain.IsJoystickActive = true;
+    //         _playerBrain.SetMoveRight();
+    //     }
+    //     else if (_inputVector.x < 0)
+    //     {
+    //         _playerBrain.IsJoystickActive = true;
+    //         _playerBrain.SetMoveLeft();
+    //     }
+    //     else
+    //     {   
+    //         _playerBrain.IsJoystickActive = false;
+    //         _playerBrain.StopMoving();
+    //     }
+    // }
     private void ApplyInput()
     {
-        if (_playerBrain == null) return;
+        if (_playerBrain == null)
+            return;
 
-        if (_inputVector.x > 0)
-        {
-            _playerBrain.IsJoystickActive = true;
-            _playerBrain.SetMoveRight();
-        }
-        else if (_inputVector.x < 0)
-        {
-            _playerBrain.IsJoystickActive = true;
-            _playerBrain.SetMoveLeft();
-        }
-        else
-        {   
-            _playerBrain.IsJoystickActive = false;
-            _playerBrain.StopMoving();
-        }
+        _playerBrain.SetHorizontalInput(_inputVector.x);
     }
 }
