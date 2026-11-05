@@ -130,26 +130,6 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
         }
     }
 
-    // private void ApplyInput()
-    // {
-    //     if (_playerBrain == null) return;
-
-    //     if (_inputVector.x > 0)
-    //     {
-    //         _playerBrain.IsJoystickActive = true;
-    //         _playerBrain.SetMoveRight();
-    //     }
-    //     else if (_inputVector.x < 0)
-    //     {
-    //         _playerBrain.IsJoystickActive = true;
-    //         _playerBrain.SetMoveLeft();
-    //     }
-    //     else
-    //     {   
-    //         _playerBrain.IsJoystickActive = false;
-    //         _playerBrain.StopMoving();
-    //     }
-    // }
     private void ApplyInput()
     {
         if (_playerBrain == null)
