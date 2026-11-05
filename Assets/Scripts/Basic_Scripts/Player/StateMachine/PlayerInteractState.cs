@@ -1,42 +1,42 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerInteractState : IPlayerState
 {
-    private PlayerStateController _playerStateController;
+    private readonly PlayerBrain _playerBrain;
 
-    public PlayerInteractState(PlayerStateController playerStateController)
+    public PlayerInteractState(PlayerBrain playerBrain)
     {
-        _playerStateController = playerStateController;
+        _playerBrain = playerBrain;
     }
-    
+
     public void Enter()
     {
-        // _playerStateController.StopMoving();
+        var interactable = _playerBrain.Interectable;
 
-        // Проверяем, есть ли перед нами интерактивный объект
-        if (_playerStateController.Interectable != null && 
-            _playerStateController.Interectable.CurrentInteractable != null)
+        if (interactable != null &&
+            interactable.CurrentInteractable != null)
         {
-            if(_playerStateController.Interectable.CurrentTag == "pick_up_item")
+            if (interactable.CurrentTag == "pick_up_item")
             {
                 Debug.Log("Try pick up");
-                _playerStateController.Animator.SetTrigger("PickUpItem");
+
+                _playerBrain.Animator.SetTrigger("PickUpItem");
             }
-            _playerStateController.Interectable.CurrentInteractable.Interact();
+
+            interactable.CurrentInteractable.Interact();
         }
 
-        //TODO: change logic with animation
-        _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
-            
+        // TODO: Пересмотреть логику перехода после анимации.
+        _playerBrain.StateMachine.ChangeState(
+            _playerBrain.IdleState
+        );
     }
 
-    public void UpdateState() 
-    { 
+    public void UpdateState()
+    {
     }
 
     public void Exit()
     {
-        
     }
 }

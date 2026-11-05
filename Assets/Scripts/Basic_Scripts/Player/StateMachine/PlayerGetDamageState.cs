@@ -2,41 +2,47 @@ using UnityEngine;
 
 /// <summary>
 /// Короткая реакция игрока на несмертельный урон.
-/// Состояние запускается через событие PlayerHealth.Damaged,
-/// а не напрямую компонентами врага.
 /// </summary>
 public class PlayerGetDamageState : IPlayerState
 {
-    private readonly PlayerStateController _playerStateController;
+    private readonly PlayerBrain _playerBrain;
     private float _timer;
 
-    public PlayerGetDamageState(PlayerStateController playerStateController)
+    public PlayerGetDamageState(PlayerBrain playerBrain)
     {
-        _playerStateController = playerStateController;
+        _playerBrain = playerBrain;
     }
 
     public void Enter()
     {
         _timer = 0f;
 
-        // Останавливаем игрока на время hit reaction.
-        // Если до этого было приседание, переход вызовет Exit у PlayerCrouchState
-        // и вернёт исходный размер коллайдера.
-        _playerStateController.StopMoving();
-        _playerStateController.ApplyHitKnockback(_playerStateController.LastDamageInfo);
-        _playerStateController.Animator.SetTrigger("GetDamage");
-    } 
+        // Останавливаем движение.
+        _playerBrain.StopMoving();
+
+        // Применяем отбрасывание от источника урона.
+        _playerBrain.ApplyHitKnockback(
+            _playerBrain.LastDamageInfo
+        );
+
+        // Запускаем анимацию получения урона.
+        _playerBrain.Animator.SetTrigger("GetDamage");
+    }
 
     public void UpdateState()
     {
         _timer += Time.deltaTime;
 
-        // Смерть обрабатывается событием PlayerHealth.Died и переводит в PlayerDieState.
-        if (_playerStateController.Health.IsDead)
+        // Смерть обрабатывается отдельно через PlayerHealth.Died.
+        if (_playerBrain.Health.IsDead)
             return;
 
-        if (_timer >= _playerStateController.GetDamageDuration)
-            _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
+        if (_timer >= _playerBrain.GetDamageDuration)
+        {
+            _playerBrain.StateMachine.ChangeState(
+                _playerBrain.IdleState
+            );
+        }
     }
 
     public void Exit()

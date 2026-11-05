@@ -3,21 +3,21 @@ using UnityEngine.EventSystems;
 
 public class ActionButton : MonoBehaviour, IPointerDownHandler {
 
-    [SerializeField] private PlayerStateController _playerStateController;
+    [SerializeField] private PlayerBrain _playerBrain;
 
     private void Awake()
     {
         // Если забыл перетащить в инспекторе, находим игрока автоматически на сцене
-        if (_playerStateController == null)
+        if (_playerBrain == null)
         {
-            _playerStateController = FindAnyObjectByType<PlayerStateController>();
+            _playerBrain = FindAnyObjectByType<PlayerBrain>();
         }
     }
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (_playerStateController != null)
+        if (_playerBrain != null)
         {
-            _playerStateController.Interact();
+            _playerBrain.Interact();
         }
     }
     

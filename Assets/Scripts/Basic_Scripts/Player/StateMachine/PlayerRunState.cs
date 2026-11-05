@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class PlayerRunState : IPlayerState
 {
-    private PlayerStateController _playerStateController;
+    private readonly PlayerBrain _playerBrain;
 
-    public PlayerRunState(PlayerStateController playerStateController)
+    public PlayerRunState(PlayerBrain playerBrain)
     {
-        _playerStateController = playerStateController;
+        _playerBrain = playerBrain;
     }
 
     public void Enter() { }
@@ -14,18 +14,18 @@ public class PlayerRunState : IPlayerState
     public void UpdateState()
     {
         // Передаем текущую скорость в аниматор (абсолютное значение ввода)
-        _playerStateController.Animator.SetFloat("Speed", Mathf.Abs(_playerStateController.HorizontalInput));
+        _playerBrain.Animator.SetFloat("Speed", Mathf.Abs(_playerBrain.HorizontalInput));
 
         // Если ввод прекратился (вернулся к 0) — возвращаемся в Idle
-        if (Mathf.Abs(_playerStateController.HorizontalInput) < 0.1f)
+        if (Mathf.Abs(_playerBrain.HorizontalInput) < 0.1f)
         {
-            _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
+            _playerBrain.StateMachine.ChangeState(_playerBrain.IdleState);
         }
     }
 
     public void Exit()
     {
         // При выходе из бега обнуляем скорость в аниматоре
-        _playerStateController.Animator.SetFloat("Speed", 0f);
+        _playerBrain.Animator.SetFloat("Speed", 0f);
     }
 }

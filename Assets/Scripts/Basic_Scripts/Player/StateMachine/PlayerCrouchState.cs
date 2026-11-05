@@ -1,35 +1,44 @@
+
 using UnityEngine;
 
 public class PlayerCrouchState : IPlayerState
 {
-    private PlayerStateController _playerStateController;
+    private readonly PlayerBrain _playerBrain;
 
-    public PlayerCrouchState(PlayerStateController playerStateController)
+    public PlayerCrouchState(PlayerBrain playerBrain)
     {
-        _playerStateController = playerStateController;
+        _playerBrain = playerBrain;
     }
 
     public void Enter()
     {
-        _playerStateController.Animator.SetBool("IsCrouching", true);
-        
-        // Уменьшаем коллайдер для приседания
-        _playerStateController.Collider.size = new Vector2(_playerStateController.OriginalColliderSize.x, _playerStateController.OriginalColliderSize.y / 2);
-        _playerStateController.Collider.offset = new Vector2(_playerStateController.OriginalColliderOffset.x, _playerStateController.OriginalColliderOffset.y - (_playerStateController.OriginalColliderSize.y / 4));
+        _playerBrain.Animator.SetBool("IsCrouching", true);
+
+        // Уменьшаем коллайдер для приседания.
+        _playerBrain.Collider.size = new Vector2(
+            _playerBrain.OriginalColliderSize.x,
+            _playerBrain.OriginalColliderSize.y / 2);
+
+        _playerBrain.Collider.offset = new Vector2(
+            _playerBrain.OriginalColliderOffset.x,
+            _playerBrain.OriginalColliderOffset.y -
+            (_playerBrain.OriginalColliderSize.y / 4));
     }
 
     public void UpdateState()
     {
-        // Передаем абсолютное значение горизонтального ввода в параметр Speed для анимации ходьбы на корточках
-        _playerStateController.Animator.SetFloat("Speed", Mathf.Abs(_playerStateController.HorizontalInput));
+        // Передаём горизонтальный ввод в Animator.
+        _playerBrain.Animator.SetFloat(
+            "Speed",
+            Mathf.Abs(_playerBrain.HorizontalInput));
     }
 
     public void Exit()
     {
-        _playerStateController.Animator.SetBool("IsCrouching", false);
+        _playerBrain.Animator.SetBool("IsCrouching", false);
 
-        // Возвращаем коллайдер в исходное состояние
-        _playerStateController.Collider.size = _playerStateController.OriginalColliderSize;
-        _playerStateController.Collider.offset = _playerStateController.OriginalColliderOffset;
+        // Возвращаем коллайдер в исходное состояние.
+        _playerBrain.Collider.size = _playerBrain.OriginalColliderSize;
+        _playerBrain.Collider.offset = _playerBrain.OriginalColliderOffset;
     }
 }

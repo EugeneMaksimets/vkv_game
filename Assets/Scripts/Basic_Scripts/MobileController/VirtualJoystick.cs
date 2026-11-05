@@ -9,7 +9,7 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private Image _joystickImage;
     private RectTransform _rectTransform;
     private Vector2 _inputVector = Vector2.zero;
-    [SerializeField] private PlayerStateController _playerStateController; 
+    [SerializeField] private PlayerBrain _playerBrain; 
     [SerializeField] private float _deadZone = 25f;
 
     [Header("Спрайты джойстика (Сетка 3х3)")]
@@ -20,9 +20,9 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     void Awake()
     {
         // Если забыл перетащить в инспекторе, находим игрока автоматически на сцене
-        if (_playerStateController == null)
+        if (_playerBrain == null)
         {
-            _playerStateController = FindAnyObjectByType<PlayerStateController>();
+            _playerBrain = FindAnyObjectByType<PlayerBrain>();
         }
         
         _joystickImage = GetComponent<Image>();
@@ -31,8 +31,8 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (_playerStateController != null)
-        _playerStateController.IsJoystickActive = true;
+        if (_playerBrain != null)
+        _playerBrain.IsJoystickActive = true;
 
         HandleJoystick(eventData.position, eventData.pressEventCamera);
     }
@@ -47,11 +47,11 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _inputVector = Vector2.zero;
         ApplyInput();
 
-        if (_playerStateController != null)
+        if (_playerBrain != null)
         {
-            _playerStateController.StopMoving();
-            _playerStateController.StandUp();
-            _playerStateController.IsJoystickActive = false;
+            _playerBrain.StopMoving();
+            _playerBrain.StandUp();
+            _playerBrain.IsJoystickActive = false;
         }
 
         if (_joystickSprites != null &&
@@ -77,7 +77,7 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             if (x < -_deadZone)
             {
                 _inputVector.x = -1f;
-                if(_playerStateController != null) _playerStateController.SetMoveLeft();
+                if(_playerBrain != null) _playerBrain.SetMoveLeft();
                 // Спрайт влево (индекс 3)
                 if (_joystickSprites.Length > 3 && _joystickSprites[3] != null) 
                     _joystickImage.sprite = _joystickSprites[3];
@@ -85,7 +85,7 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             else if (x > _deadZone)
             {
                 _inputVector.x = 1f;
-                if(_playerStateController != null) _playerStateController.SetMoveRight();
+                if(_playerBrain != null) _playerBrain.SetMoveRight();
                 // Спрайт вправо (индекс 2)
                 if (_joystickSprites.Length > 2 && _joystickSprites[2] != null) 
                     _joystickImage.sprite = _joystickSprites[2];
@@ -95,7 +95,7 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             if (y > _deadZone)
             {
                 // Палец потянули вверх -> Прыжок
-                if (_playerStateController != null) _playerStateController.Jump();
+                if (_playerBrain != null) _playerBrain.Jump();
                 
                 // Спрайт верха (индекс 4)
                 if (_joystickSprites.Length > 4 && _joystickSprites[4] != null) 
@@ -104,7 +104,7 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             else if (y < -_deadZone)
             {
                 // Палец потянули вниз -> Приседание
-                if (_playerStateController != null) _playerStateController.Crouch();
+                if (_playerBrain != null) _playerBrain.Crouch();
                 
                 // Спрайт низа (индекс 5)
                 if (_joystickSprites.Length > 5 && _joystickSprites[5] != null) 
@@ -113,7 +113,7 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             else
             {
                 // Если по вертикали палец в нейтральной зоне — встаем из приседа
-                if (_playerStateController != null) _playerStateController.StandUp();
+                if (_playerBrain != null) _playerBrain.StandUp();
             }
 
             // --- 3. ЕСЛИ ВСЁ В МЕРТВОЙ ЗОНЕ — ЦЕНТР ---
@@ -122,8 +122,8 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
                 if (_joystickSprites.Length > 0 && _joystickSprites[0] != null)
                     _joystickImage.sprite = _joystickSprites[0];
                 
-                if (_playerStateController != null) 
-                    _playerStateController.StandUp();
+                if (_playerBrain != null) 
+                    _playerBrain.StandUp();
             }
 
             ApplyInput();
@@ -132,22 +132,22 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
 
     private void ApplyInput()
     {
-        if (_playerStateController == null) return;
+        if (_playerBrain == null) return;
 
         if (_inputVector.x > 0)
         {
-            _playerStateController.IsJoystickActive = true;
-            _playerStateController.SetMoveRight();
+            _playerBrain.IsJoystickActive = true;
+            _playerBrain.SetMoveRight();
         }
         else if (_inputVector.x < 0)
         {
-            _playerStateController.IsJoystickActive = true;
-            _playerStateController.SetMoveLeft();
+            _playerBrain.IsJoystickActive = true;
+            _playerBrain.SetMoveLeft();
         }
         else
         {   
-            _playerStateController.IsJoystickActive = false;
-            _playerStateController.StopMoving();
+            _playerBrain.IsJoystickActive = false;
+            _playerBrain.StopMoving();
         }
     }
 }

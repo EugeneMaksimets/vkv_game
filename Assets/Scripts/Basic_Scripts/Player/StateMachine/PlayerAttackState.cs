@@ -2,42 +2,47 @@ using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
 {
-    private PlayerStateController _playerStateController;
-    private float _attackTimer;
-    private float _attackDuration = 0.5f;
+    private readonly PlayerBrain _playerBrain;
 
-    public PlayerAttackState(PlayerStateController playerStateController)
+    private float _attackTimer;
+    private readonly float _attackDuration = 0.5f;
+
+    public PlayerAttackState(PlayerBrain playerBrain)
     {
-        _playerStateController = playerStateController;
+        _playerBrain = playerBrain;
     }
 
     public void Enter()
     {
-        _playerStateController.StopMoving();
-        _playerStateController.Animator.SetTrigger("Attack");
-        _attackTimer = _attackDuration;
+        _playerBrain.StopMoving();
 
-        // Здесь же можно вызвать метод нанесения урона
+        _playerBrain.Animator.SetTrigger("Attack");
+
+        _attackTimer = _attackDuration;
     }
 
     public void UpdateState()
     {
         _attackTimer -= Time.deltaTime;
 
-        // Когда время анимации/удара истекло, возвращаемся в Idle или Run
         if (_attackTimer <= 0f)
         {
-            if (Mathf.Abs(_playerStateController.HorizontalInput) > 0.1f)
+            if (Mathf.Abs(_playerBrain.HorizontalInput) > 0.1f)
             {
-                _playerStateController.StateMachine.ChangeState(_playerStateController.RunState);
+                _playerBrain.StateMachine.ChangeState(
+                    _playerBrain.RunState
+                );
             }
             else
             {
-                _playerStateController.StateMachine.ChangeState(_playerStateController.IdleState);
+                _playerBrain.StateMachine.ChangeState(
+                    _playerBrain.IdleState
+                );
             }
         }
     }
 
-    public void Exit() {}
-
+    public void Exit()
+    {
+    }
 }

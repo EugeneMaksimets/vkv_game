@@ -1,30 +1,30 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerStateController))]
+[RequireComponent(typeof(PlayerBrain))]
 public class PlayerInputHandler : MonoBehaviour
 {
-    private PlayerStateController _playerStateController;
+    private PlayerBrain _playerBrain;
 
     void Awake()
     {
-        _playerStateController = GetComponent<PlayerStateController>();
+        _playerBrain = GetComponent<PlayerBrain>();
     }
 
     private void Update()
     {
-        if(_playerStateController == null)
+        if(_playerBrain == null)
             return;
 
         // Не считываем новые команды, пока состояние урона или смерти блокирует управление.
-        if (_playerStateController.IsControlLocked)
+        if (_playerBrain.IsControlLocked)
         {
-            _playerStateController.StopMoving();
+            _playerBrain.StopMoving();
             return;
         }
 
         //Check Joystick
-        if(_playerStateController.IsJoystickActive)
+        if(_playerBrain.IsJoystickActive)
             return;
 
         if (Keyboard.current == null)
@@ -40,28 +40,28 @@ public class PlayerInputHandler : MonoBehaviour
             Keyboard.current.rightArrowKey.isPressed)
             horizontal = 1f;
 
-        _playerStateController.SetHorizontalInput(horizontal);
+        _playerBrain.SetHorizontalInput(horizontal);
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
-            _playerStateController.Jump();
+            _playerBrain.Jump();
 
         if (Keyboard.current.fKey.wasPressedThisFrame)
-            _playerStateController.Attack();
+            _playerBrain.Attack();
 
         bool crouch =
             Keyboard.current.sKey.isPressed ||
             Keyboard.current.downArrowKey.isPressed;
 
         if (crouch)
-            _playerStateController.Crouch();
+            _playerBrain.Crouch();
         else if (
             Keyboard.current.sKey.wasReleasedThisFrame ||
             Keyboard.current.downArrowKey.wasReleasedThisFrame)
-            _playerStateController.StandUp();
+            _playerBrain.StandUp();
 
         bool isInteractPressed = 
             Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
         if(isInteractPressed)
-            _playerStateController.Interact();
+            _playerBrain.Interact();
     }
 }

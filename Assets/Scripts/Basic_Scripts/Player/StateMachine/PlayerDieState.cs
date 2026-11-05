@@ -1,25 +1,32 @@
 /// <summary>
 /// Состояние игрока после PlayerHealth.Died.
-/// Оно удерживает игрока неподвижным до события PlayerHealth.Revived.
+/// Игрок остаётся в этом состоянии до события PlayerHealth.Revived.
 /// </summary>
 public class PlayerDieState : IPlayerState
 {
-    private readonly PlayerStateController _playerStateController;
+    private readonly PlayerBrain _playerBrain;
 
-    public PlayerDieState(PlayerStateController playerStateController)
+    public PlayerDieState(PlayerBrain playerBrain)
     {
-        _playerStateController = playerStateController;
+        _playerBrain = playerBrain;
     }
 
     public void Enter()
     {
-        _playerStateController.StopMoving();
-        _playerStateController.Animator.SetTrigger("Die");
+        // Останавливаем горизонтальное движение,
+        // сохраняя вертикальную скорость Rigidbody2D.
+        _playerBrain.Rb.linearVelocity =
+            new UnityEngine.Vector2(
+                0f,
+                _playerBrain.Rb.linearVelocity.y
+            );
+
+        _playerBrain.Animator.SetTrigger("Die");
     }
 
     public void UpdateState()
     {
-        // Переход обратно выполняет HandleRevived в PlayerStateController.
+        // Переход обратно выполняет HandleRevived в PlayerBrain.
     }
 
     public void Exit()
