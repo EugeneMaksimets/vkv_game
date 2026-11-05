@@ -13,19 +13,20 @@ public class PlayerRunState : IPlayerState
 
     public void UpdateState()
     {
-        // Передаем текущую скорость в аниматор (абсолютное значение ввода)
-        _playerBrain.Animator.SetFloat("Speed", Mathf.Abs(_playerBrain.HorizontalInput));
+        _playerBrain.Animation.SetSpeed(
+            Mathf.Abs(_playerBrain.HorizontalInput)
+        );
 
-        // Если ввод прекратился (вернулся к 0) — возвращаемся в Idle
         if (Mathf.Abs(_playerBrain.HorizontalInput) < 0.1f)
         {
-            _playerBrain.StateMachine.ChangeState(_playerBrain.IdleState);
+            _playerBrain.StateMachine.ChangeState(
+                _playerBrain.IdleState
+            );
         }
     }
 
     public void Exit()
     {
-        // При выходе из бега обнуляем скорость в аниматоре
-        _playerBrain.Animator.SetFloat("Speed", 0f);
+        _playerBrain.Animation.SetSpeed(0f);
     }
 }

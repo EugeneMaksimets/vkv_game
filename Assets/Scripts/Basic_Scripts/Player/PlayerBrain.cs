@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(PlayerAnimation))]
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerInterectable))]
@@ -14,7 +14,7 @@ public class PlayerBrain : MonoBehaviour
 
     [Header("Components")]
     public Rigidbody2D Rb { get; private set; }
-    public Animator Animator { get; private set; }
+    public PlayerAnimation Animation { get; private set; }
     public BoxCollider2D Collider { get; private set; }
     public PlayerInterectable Interectable { get; private set; }
     public PlayerHealth Health { get; private set; }
@@ -41,17 +41,20 @@ public class PlayerBrain : MonoBehaviour
 
     public float GetDamageDuration => _getDamageDuration;
 
+    
     [Header("State Machine")]
     public PlayerStateMachine StateMachine { get; private set; }
+    public PlayerStateFactory StateFactory { get; private set; }
 
-    internal PlayerIdleState IdleState { get; private set; }
-    internal PlayerRunState RunState { get; private set; }
-    internal PlayerJumpState JumpState { get; private set; }
-    internal PlayerCrouchState CrouchState { get; private set; }
-    internal PlayerAttackState AttackState { get; private set; }
-    internal PlayerInteractState InteractState { get; private set; }
-    internal PlayerGetDamageState GetDamageState { get; private set; }
-    internal PlayerDieState DieState { get; private set; }
+
+    public PlayerIdleState IdleState { get; private set; }
+    public PlayerRunState RunState { get; private set; }
+    public PlayerJumpState JumpState { get; private set; }
+    public PlayerCrouchState CrouchState { get; private set; }
+    public PlayerAttackState AttackState { get; private set; }
+    public PlayerInteractState InteractState { get; private set; }
+    public PlayerGetDamageState GetDamageState { get; private set; }
+    public PlayerDieState DieState { get; private set; }
 
     public bool IsControlLocked
     {
@@ -71,7 +74,7 @@ public class PlayerBrain : MonoBehaviour
         _playerMovement = GetComponent<PlayerMovement>();
 
         Rb = GetComponent<Rigidbody2D>();
-        Animator = GetComponent<Animator>();
+        Animation = GetComponent<PlayerAnimation>();
         Collider = GetComponent<BoxCollider2D>();
         Interectable = GetComponent<PlayerInterectable>();
         Health = GetComponent<PlayerHealth>();
@@ -83,14 +86,17 @@ public class PlayerBrain : MonoBehaviour
 
         StateMachine = new PlayerStateMachine();
 
-        IdleState = new PlayerIdleState(this);
-        RunState = new PlayerRunState(this);
-        JumpState = new PlayerJumpState(this);
-        CrouchState = new PlayerCrouchState(this);
-        AttackState = new PlayerAttackState(this);
-        InteractState = new PlayerInteractState(this);
-        GetDamageState = new PlayerGetDamageState(this);
-        DieState = new PlayerDieState(this);
+        StateFactory = new PlayerStateFactory(this);
+        StateFactory.CreateStates();
+
+        IdleState = StateFactory.IdleState;
+        RunState = StateFactory.RunState;
+        JumpState = StateFactory.JumpState;
+        CrouchState = StateFactory.CrouchState;
+        AttackState = StateFactory.AttackState;
+        InteractState = StateFactory.InteractState;
+        GetDamageState = StateFactory.GetDamageState;
+        DieState = StateFactory.DieState;
     }
 
     private void OnEnable()
@@ -116,7 +122,8 @@ public class PlayerBrain : MonoBehaviour
 
     private void Update()
     {
-        Animator.SetBool("IsGrounded", IsGrounded);
+        // Animator.SetBool("IsGrounded", IsGrounded);
+        Animation.SetGrounded(IsGrounded);
 
         StateMachine.Update();
 

@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class PlayerAttackState : IPlayerState
@@ -16,7 +17,7 @@ public class PlayerAttackState : IPlayerState
     {
         _playerBrain.StopMoving();
 
-        _playerBrain.Animator.SetTrigger("Attack");
+        _playerBrain.Animation.PlayAttack();
 
         _attackTimer = _attackDuration;
     }
@@ -42,7 +43,5 @@ public class PlayerAttackState : IPlayerState
         }
     }
 
-    public void Exit()
-    {
-    }
+    public void Exit() { }
 }

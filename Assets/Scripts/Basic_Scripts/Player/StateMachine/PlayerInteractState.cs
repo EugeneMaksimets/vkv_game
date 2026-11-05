@@ -1,4 +1,3 @@
-using UnityEngine;
 
 public class PlayerInteractState : IPlayerState
 {
@@ -18,25 +17,19 @@ public class PlayerInteractState : IPlayerState
         {
             if (interactable.CurrentTag == "pick_up_item")
             {
-                Debug.Log("Try pick up");
-
-                _playerBrain.Animator.SetTrigger("PickUpItem");
+                _playerBrain.Animation.PlayPickUpItem();
             }
 
             interactable.CurrentInteractable.Interact();
         }
 
-        // TODO: Пересмотреть логику перехода после анимации.
+        // TODO: Пересмотреть переход после анимации.
         _playerBrain.StateMachine.ChangeState(
             _playerBrain.IdleState
         );
     }
 
-    public void UpdateState()
-    {
-    }
+    public void UpdateState() { }
 
-    public void Exit()
-    {
-    }
+    public void Exit() { }
 }

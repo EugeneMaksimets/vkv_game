@@ -12,33 +12,35 @@ public class PlayerCrouchState : IPlayerState
 
     public void Enter()
     {
-        _playerBrain.Animator.SetBool("IsCrouching", true);
+        _playerBrain.Animation.SetCrouching(true);
 
-        // Уменьшаем коллайдер для приседания.
         _playerBrain.Collider.size = new Vector2(
             _playerBrain.OriginalColliderSize.x,
-            _playerBrain.OriginalColliderSize.y / 2);
+            _playerBrain.OriginalColliderSize.y / 2
+        );
 
         _playerBrain.Collider.offset = new Vector2(
             _playerBrain.OriginalColliderOffset.x,
             _playerBrain.OriginalColliderOffset.y -
-            (_playerBrain.OriginalColliderSize.y / 4));
+            (_playerBrain.OriginalColliderSize.y / 4)
+        );
     }
 
     public void UpdateState()
     {
-        // Передаём горизонтальный ввод в Animator.
-        _playerBrain.Animator.SetFloat(
-            "Speed",
-            Mathf.Abs(_playerBrain.HorizontalInput));
+        _playerBrain.Animation.SetSpeed(
+            Mathf.Abs(_playerBrain.HorizontalInput)
+        );
     }
 
     public void Exit()
     {
-        _playerBrain.Animator.SetBool("IsCrouching", false);
+        _playerBrain.Animation.SetCrouching(false);
 
-        // Возвращаем коллайдер в исходное состояние.
-        _playerBrain.Collider.size = _playerBrain.OriginalColliderSize;
-        _playerBrain.Collider.offset = _playerBrain.OriginalColliderOffset;
+        _playerBrain.Collider.size =
+            _playerBrain.OriginalColliderSize;
+
+        _playerBrain.Collider.offset =
+            _playerBrain.OriginalColliderOffset;
     }
 }

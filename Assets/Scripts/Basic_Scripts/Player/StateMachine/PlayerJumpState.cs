@@ -15,13 +15,11 @@ public class PlayerJumpState : IPlayerState
     {
         _hasLeftGround = false;
 
-        _playerBrain.Animator.ResetTrigger("Jump");
-        _playerBrain.Animator.SetTrigger("Jump");
+        _playerBrain.Animation.PlayJump();
     }
 
     public void UpdateState()
     {
-        // Сначала обязательно ждём отрыва от земли.
         if (!_hasLeftGround)
         {
             if (!_playerBrain.IsGrounded)
@@ -32,17 +30,20 @@ public class PlayerJumpState : IPlayerState
             return;
         }
 
-        // Возвращаемся в обычное состояние только после приземления.
         if (_playerBrain.IsGrounded &&
             _playerBrain.Rb.linearVelocity.y <= 0.01f)
         {
             if (Mathf.Abs(_playerBrain.HorizontalInput) > 0.1f)
             {
-                _playerBrain.StateMachine.ChangeState(_playerBrain.RunState);
+                _playerBrain.StateMachine.ChangeState(
+                    _playerBrain.RunState
+                );
             }
             else
             {
-                _playerBrain.StateMachine.ChangeState(_playerBrain.IdleState);
+                _playerBrain.StateMachine.ChangeState(
+                    _playerBrain.IdleState
+                );
             }
         }
     }

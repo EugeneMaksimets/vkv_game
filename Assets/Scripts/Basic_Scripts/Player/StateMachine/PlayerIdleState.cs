@@ -11,7 +11,7 @@ public class PlayerIdleState : IPlayerState
     public void Enter()
     {
         // In IDLE speed = 0
-        _playerBrain.Animator.SetFloat("Speed", 0f);
+        _playerBrain.Animation.SetSpeed(0f);
     }
 
     public void UpdateState()
