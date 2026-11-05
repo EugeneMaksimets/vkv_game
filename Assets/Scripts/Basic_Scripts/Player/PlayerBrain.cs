@@ -27,9 +27,6 @@ public class PlayerBrain : MonoBehaviour
     public bool IsGrounded => _playerMovement.IsGrounded;
     public float JumpForce => _playerMovement.JumpForce;
 
-    public Vector2 OriginalColliderSize { get; private set; }
-    public Vector2 OriginalColliderOffset { get; private set; }
-
     public bool IsJoystickActive
     {
         get => _isJoystickActive;
@@ -78,9 +75,6 @@ public class PlayerBrain : MonoBehaviour
         Collider = GetComponent<BoxCollider2D>();
         Interectable = GetComponent<PlayerInterectable>();
         Health = GetComponent<PlayerHealth>();
-
-        OriginalColliderSize = Collider.size;
-        OriginalColliderOffset = Collider.offset;
 
         _originalScale = transform.localScale;
 

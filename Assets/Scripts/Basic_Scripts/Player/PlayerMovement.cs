@@ -26,6 +26,8 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsGrounded { get; private set; }
     public float JumpForce => _jumpForce;
+    public Vector2 OriginalColliderSize { get; private set; }
+    public Vector2 OriginalColliderOffset { get; private set; }
 
     private float _horizontalInput;
     private float _knockbackVelocityX;
@@ -36,6 +38,9 @@ public class PlayerMovement : MonoBehaviour
     {
         Rb = GetComponent<Rigidbody2D>();
         Collider = GetComponent<BoxCollider2D>();
+
+        OriginalColliderSize = Collider.size;
+        OriginalColliderOffset = Collider.offset;
     }
 
     private void Update()
@@ -51,11 +56,27 @@ public class PlayerMovement : MonoBehaviour
     public void SetHorizontalInput(float input)
     {
         _horizontalInput = Mathf.Clamp(input, -1f, 1f);
-    }
-
-    public void SetCrouching(bool value)
+    }    public void SetCrouching(bool value)
     {
         _isCrouching = value;
+
+        if (value)
+        {
+            Collider.size = new Vector2(
+                OriginalColliderSize.x,
+                OriginalColliderSize.y / 2f
+            );
+
+            Collider.offset = new Vector2(
+                OriginalColliderOffset.x,
+                OriginalColliderOffset.y - OriginalColliderSize.y / 4f
+            );
+        }
+        else
+        {
+            Collider.size = OriginalColliderSize;
+            Collider.offset = OriginalColliderOffset;
+        }
     }
 
     public void Jump()
