@@ -10,7 +10,7 @@ public class PlayerInteractState : IPlayerState
 
     public void Enter()
     {
-        var interactable = _playerBrain.Interectable;
+        var interactable = _playerBrain.Interaction;
 
         if (interactable != null &&
             interactable.CurrentInteractable != null)

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerInterectable : MonoBehaviour
+public class PlayerInteraction : MonoBehaviour
 {
     [Header("Cleanup")]
     // Timer for clean interactable object
-    [SerializeField, Min(0.1f)] private float _cleanupInterval = 0.5f;
+    [SerializeField, Min(0.1f)] private float _cleanupInterval = 0.2f;
     private float _cleanupTimer;
     // Tracks all interactable Colliders currently inside the player's interaction range.
     private readonly Dictionary<IInteractable, HashSet<Collider2D>> _interactables = new();
@@ -13,12 +13,14 @@ public class PlayerInterectable : MonoBehaviour
     private readonly List<Collider2D> _invalidColliders = new();
     private IInteractable _currentInteractable;
     public IInteractable CurrentInteractable => _currentInteractable;
+    public bool HasInteractable => CurrentInteractable != null;
     public string CurrentTag => (CurrentInteractable as MonoBehaviour)?.tag;
 
 
     private void Update()
     {
-        UpdateCleanupTimer();
+        if(!UpdateCleanupTimer())
+            return;
         
         CleanupInvalidInteractables();
         _currentInteractable = GetClosestInteractable();
@@ -142,16 +144,17 @@ public class PlayerInterectable : MonoBehaviour
             _currentInteractable = null;
         }   
     }
-    private void UpdateCleanupTimer()
+    private bool UpdateCleanupTimer()
     {
         _cleanupTimer += Time.deltaTime;
 
         if (_cleanupTimer < _cleanupInterval)
         {
-            return;
+            return false;
         }
 
         _cleanupTimer = 0f;
+        return true;
     }
 
 }

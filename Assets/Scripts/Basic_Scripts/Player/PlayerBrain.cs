@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerAnimation))]
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(PlayerMovement))]
-[RequireComponent(typeof(PlayerInterectable))]
+[RequireComponent(typeof(PlayerInteraction))]
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerBrain : MonoBehaviour
 {
@@ -16,7 +16,7 @@ public class PlayerBrain : MonoBehaviour
     public Rigidbody2D Rb { get; private set; }
     public PlayerAnimation Animation { get; private set; }
     public BoxCollider2D Collider { get; private set; }
-    public PlayerInterectable Interectable { get; private set; }
+    public PlayerInteraction Interaction { get; private set; }
     public PlayerHealth Health { get; private set; }
 
     public DamageInfo LastDamageInfo { get; private set; }
@@ -73,7 +73,7 @@ public class PlayerBrain : MonoBehaviour
         Rb = GetComponent<Rigidbody2D>();
         Animation = GetComponent<PlayerAnimation>();
         Collider = GetComponent<BoxCollider2D>();
-        Interectable = GetComponent<PlayerInterectable>();
+        Interaction = GetComponent<PlayerInteraction>();
         Health = GetComponent<PlayerHealth>();
 
         _originalScale = transform.localScale;
@@ -228,8 +228,8 @@ public class PlayerBrain : MonoBehaviour
             return;
 
         bool hasInteractable =
-            Interectable != null &&
-            Interectable.CurrentInteractable != null;
+            Interaction != null &&
+            Interaction.HasInteractable;
 
         if (hasInteractable)
         {

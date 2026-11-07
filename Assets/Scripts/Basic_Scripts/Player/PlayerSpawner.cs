@@ -1,10 +1,16 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerSpawner : MonoBehaviour
 {
+    private Rigidbody2D _rb;
 
-    void Start()
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Start()
     {
         SpawnPlayerAtDoor();
     }
@@ -33,16 +39,18 @@ public class PlayerSpawner : MonoBehaviour
 
             if (spawnPoint.DoorID == TransitionSpawnManager.LastDoorName)
             {
-                Rigidbody2D rb = GetComponent<Rigidbody2D>();
-                if (rb != null)
+                
+                if (_rb != null)
                 {
-                    rb.position = spawnPoint.transform.position;
-                    rb.linearVelocity = Vector2.zero;
+                    _rb.position = spawnPoint.transform.position;
+                    _rb.linearVelocity = Vector2.zero;
                 }
                 else
                 {
                     transform.position = spawnPoint.transform.position;
                 }
+
+                TransitionSpawnManager.LastDoorName = null;
 
                 Debug.Log("Игрок успешно телепортирован к точке: " + spawnPoint.DoorID);
                 spawned = true;
