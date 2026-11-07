@@ -267,17 +267,25 @@ public class PlayerBrain : MonoBehaviour
 
         if (health.CurrentHealth > 0f)
         {
+            StopMoving();
+            _playerMovement.SetCrouching(false);
             StateMachine.ChangeState(GetDamageState);
         }
     }
 
     private void HandleDied(PlayerHealth health)
     {
+        StopMoving();
+        _playerMovement.SetCrouching(false);
+        _isJoystickActive = false;
         StateMachine.ChangeState(DieState);
     }
 
     private void HandleRevived(PlayerHealth health)
     {
+        StopMoving();
+        _playerMovement.SetCrouching(false);
+        _isJoystickActive = false;
         StateMachine.ChangeState(IdleState);
     }
 

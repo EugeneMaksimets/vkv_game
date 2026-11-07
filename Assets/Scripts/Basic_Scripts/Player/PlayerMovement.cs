@@ -43,6 +43,39 @@ public class PlayerMovement : MonoBehaviour
         OriginalColliderOffset = Collider.offset;
     }
 
+     private void FixedUpdate()
+    {
+        float horizontalVelocity;
+
+        if(_knockbackTimeReminging > 0f)
+        {
+            // Пока действует отбрасывание, ввод игрока не влияет на X-скорость.
+            horizontalVelocity = _knockbackVelocityX;
+            _knockbackTimeReminging -= Time.fixedDeltaTime;
+        }
+        else
+        {
+            _knockbackTimeReminging = 0f;
+            _knockbackVelocityX = 0f;
+            
+            float speed = _isCrouching
+                ? _moveSpeed * _crouchSpeedMultiplier
+                : _moveSpeed;
+
+            horizontalVelocity = _horizontalInput * speed;
+        }
+
+        Rb.linearVelocity = new Vector2(horizontalVelocity, Rb.linearVelocity.y);
+
+        if(_useLevelBounds)
+        {
+            Vector2 position = Rb.position;
+            position.x = Mathf.Clamp(position.x, _minX, _maxX);
+            Rb.position = position;
+        }
+
+    }
+
     private void Update()
     {
         IsGrounded = _groundCheck != null &&
@@ -114,47 +147,5 @@ public class PlayerMovement : MonoBehaviour
         _knockbackTimeReminging = duraction;
     }
 
-    private void FixedUpdate()
-    {
-        float horizontalVelocity;
-
-        if(_knockbackTimeReminging > 0f)
-        {
-            // Пока действует отбрасывание, ввод игрока не влияет на X-скорость.
-            horizontalVelocity = _knockbackVelocityX;
-            _knockbackTimeReminging -= Time.fixedDeltaTime;
-        }
-        else
-        {
-            float speed = _isCrouching
-                ? _moveSpeed * _crouchSpeedMultiplier
-                : _moveSpeed;
-
-            horizontalVelocity = _horizontalInput * speed;
-        }
-
-        Rb.linearVelocity = new Vector2(horizontalVelocity, Rb.linearVelocity.y);
-
-        if(_useLevelBounds)
-        {
-            Vector2 position = Rb.position;
-            position.x = Mathf.Clamp(position.x, _minX, _maxX);
-            Rb.position = position;
-        }
-        // float speed = _isCrouching
-        //     ? _moveSpeed * _crouchSpeedMultiplier
-        //     : _moveSpeed;
-
-        // Rb.linearVelocity = new Vector2(
-        //     _horizontalInput * speed,
-        //     Rb.linearVelocity.y
-        // );
-
-        // if (_useLevelBounds)
-        // {
-        //     Vector2 position = Rb.position;
-        //     position.x = Mathf.Clamp(position.x, _minX, _maxX);
-        //     Rb.position = position;
-        // }
-    }
+   
 }
