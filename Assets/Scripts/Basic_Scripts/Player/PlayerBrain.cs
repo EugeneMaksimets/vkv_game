@@ -9,7 +9,6 @@ using UnityEngine;
 public class PlayerBrain : MonoBehaviour
 {
     private PlayerMovement _playerMovement;
-    private Vector3 _originalScale;
     private bool _isJoystickActive;
 
     [Header("Components")]
@@ -22,7 +21,11 @@ public class PlayerBrain : MonoBehaviour
     public DamageInfo LastDamageInfo { get; private set; }
 
     [Header("Input")]
-    public float HorizontalInput { get; private set; }
+    [System.Obsolete(
+        "Use PlayerMovement.HorizontalInput instead. " +
+        "This property will be removed during state refactoring."
+    )]
+    public float HorizontalInput => _playerMovement.HorizontalInput;
 
     public bool IsGrounded => _playerMovement.IsGrounded;
     public float JumpForce => _playerMovement.JumpForce;
@@ -76,7 +79,6 @@ public class PlayerBrain : MonoBehaviour
         Interaction = GetComponent<PlayerInteraction>();
         Health = GetComponent<PlayerHealth>();
 
-        _originalScale = transform.localScale;
 
         StateMachine = new PlayerStateMachine();
 
@@ -119,9 +121,10 @@ public class PlayerBrain : MonoBehaviour
         // Animator.SetBool("IsGrounded", IsGrounded);
         Animation.SetGrounded(IsGrounded);
 
+        HandleMovementStateTransition();
+
         StateMachine.Update();
 
-        UpdateFacingDirection();
     }
 
     #region Input API
@@ -130,14 +133,12 @@ public class PlayerBrain : MonoBehaviour
     {
         if (IsControlLocked)
         {
-            HorizontalInput = 0f;
             _playerMovement.SetHorizontalInput(0f);
             return;
         }
 
-        HorizontalInput = Mathf.Clamp(input, -1f, 1f);
-
-        _playerMovement.SetHorizontalInput(HorizontalInput);
+        _playerMovement.SetHorizontalInput(input);
+        
     }
 
     public void SetMoveRight() => SetHorizontalInput(1f);
@@ -149,6 +150,25 @@ public class PlayerBrain : MonoBehaviour
     #endregion
 
     #region State Transitions
+
+    private void HandleMovementStateTransition()
+    {
+        if (IsControlLocked || !IsGrounded)
+            return;
+
+        IPlayerState currentState = StateMachine.CurrentState;
+
+        float horizontalInput = _playerMovement.HorizontalInput;
+
+        if (currentState == IdleState && Mathf.Abs(horizontalInput) > 0.1f)
+        {
+            StateMachine.ChangeState(RunState);
+        }
+        else if (currentState == RunState && Mathf.Abs(horizontalInput) <= 0.1f)
+        {
+            StateMachine.ChangeState(IdleState);
+        }
+    }
 
     public void Jump()
     {
@@ -195,7 +215,7 @@ public class PlayerBrain : MonoBehaviour
 
         _playerMovement.SetCrouching(false);
 
-        if (Mathf.Abs(HorizontalInput) > 0.1f)
+        if (Mathf.Abs(_playerMovement.HorizontalInput) > 0.1f)
         {
             StateMachine.ChangeState(RunState);
         }
@@ -293,31 +313,6 @@ public class PlayerBrain : MonoBehaviour
 
     #region Facing Direction
 
-    private void UpdateFacingDirection()
-    {
-        if (HorizontalInput > 0f)
-        {
-            SetFacingDirection(1f);
-        }
-        else if (HorizontalInput < 0f)
-        {
-            SetFacingDirection(-1f);
-        }
-    }
-
-    private void SetFacingDirection(float direction)
-    {
-        Vector3 newScale = new Vector3(
-            Mathf.Abs(_originalScale.x) * direction,
-            _originalScale.y,
-            _originalScale.z
-        );
-
-        if (transform.localScale != newScale)
-        {
-            transform.localScale = newScale;
-        }
-    }
 
     #endregion
 

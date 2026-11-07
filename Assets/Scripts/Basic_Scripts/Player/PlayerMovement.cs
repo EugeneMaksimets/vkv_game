@@ -28,16 +28,19 @@ public class PlayerMovement : MonoBehaviour
     public float JumpForce => _jumpForce;
     public Vector2 OriginalColliderSize { get; private set; }
     public Vector2 OriginalColliderOffset { get; private set; }
+    public float HorizontalInput { get; private set; }
 
-    private float _horizontalInput;
     private float _knockbackVelocityX;
     private float _knockbackTimeReminging;
     private bool _isCrouching;
+    private Vector3 _originalScale;
 
     private void Awake()
     {
         Rb = GetComponent<Rigidbody2D>();
         Collider = GetComponent<BoxCollider2D>();
+
+        _originalScale = transform.localScale;
 
         OriginalColliderSize = Collider.size;
         OriginalColliderOffset = Collider.offset;
@@ -62,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
                 ? _moveSpeed * _crouchSpeedMultiplier
                 : _moveSpeed;
 
-            horizontalVelocity = _horizontalInput * speed;
+            horizontalVelocity = HorizontalInput * speed;
         }
 
         Rb.linearVelocity = new Vector2(horizontalVelocity, Rb.linearVelocity.y);
@@ -73,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
             position.x = Mathf.Clamp(position.x, _minX, _maxX);
             Rb.position = position;
         }
+  
 
     }
 
@@ -88,8 +92,40 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetHorizontalInput(float input)
     {
-        _horizontalInput = Mathf.Clamp(input, -1f, 1f);
-    }    public void SetCrouching(bool value)
+        HorizontalInput = Mathf.Clamp(input, -1f, 1f);
+
+        UpdateFacingDirection();
+
+    }
+
+
+    private void UpdateFacingDirection()
+    {
+        if (HorizontalInput > 0f)
+        {
+            SetFacingDirection(1f);
+        }
+        else if (HorizontalInput < 0f)
+        {
+            SetFacingDirection(-1f);
+        }
+    }
+
+    private void SetFacingDirection(float direction)
+    {
+        Vector3 newScale = new Vector3(
+            Mathf.Abs(_originalScale.x) * direction,
+            _originalScale.y,
+            _originalScale.z
+        );
+
+        if (transform.localScale != newScale)
+        {
+            transform.localScale = newScale;
+        }
+    }
+
+    public void SetCrouching(bool value)
     {
         _isCrouching = value;
 
@@ -142,7 +178,7 @@ public class PlayerMovement : MonoBehaviour
             ? Mathf.Sign(diffirenceX) 
             : transform.localScale.x >= 0f ? -1f : 1f;
 
-        _horizontalInput = 0f;
+        SetHorizontalInput(0f);
         _knockbackVelocityX = direction * speed;
         _knockbackTimeReminging = duraction;
     }

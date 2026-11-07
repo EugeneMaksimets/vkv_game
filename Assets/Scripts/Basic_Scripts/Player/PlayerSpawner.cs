@@ -13,6 +13,29 @@ public class PlayerSpawner : MonoBehaviour
     private void Start()
     {
         SpawnPlayerAtDoor();
+        InitializeJoystick();
+    }
+
+    private void InitializeJoystick()
+    {
+        VirtualJoystick joystick =
+        Object.FindAnyObjectByType<VirtualJoystick>();
+
+        if (joystick == null)
+        {
+            Debug.LogWarning("[PlayerSpawner] VirtualJoystick not found!");
+            return;
+        }
+
+        PlayerBrain playerBrain = GetComponent<PlayerBrain>();
+
+        if (playerBrain == null)
+        {
+            Debug.LogError("[PlayerSpawner] PlayerBrain not found!");
+            return;
+        }
+
+        joystick.Initialize(playerBrain);
     }
 
     private void SpawnPlayerAtDoor()

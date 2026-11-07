@@ -16,13 +16,6 @@ public class PlayerRunState : IPlayerState
         _playerBrain.Animation.SetSpeed(
             Mathf.Abs(_playerBrain.HorizontalInput)
         );
-
-        if (Mathf.Abs(_playerBrain.HorizontalInput) < 0.1f)
-        {
-            _playerBrain.StateMachine.ChangeState(
-                _playerBrain.IdleState
-            );
-        }
     }
 
     public void Exit()

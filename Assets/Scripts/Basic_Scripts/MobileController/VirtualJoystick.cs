@@ -6,33 +6,31 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
-    private Image _joystickImage;
-    private RectTransform _rectTransform;
-    private Vector2 _inputVector = Vector2.zero;
-    [SerializeField] private PlayerBrain _playerBrain; 
     [SerializeField] private float _deadZone = 25f;
 
     [Header("Спрайты джойстика (Сетка 3х3)")]
     // Индексы спрайтов в массиве
     // 0 - Центр, 1 - Клик, 2 - Вправо, 3 - Влево, 4 - Верх, 5 - Вниз 
     [SerializeField] private Sprite[] _joystickSprites; 
+
+    private PlayerBrain _playerBrain;
+    private Image _joystickImage;
+    private RectTransform _rectTransform;
+    private Vector2 _inputVector = Vector2.zero;
+    private bool _isPointerHeld;
     
-    void Awake()
+    private void Awake()
     {
-        // Если забыл перетащить в инспекторе, находим игрока автоматически на сцене
-        if (_playerBrain == null)
-        {
-            _playerBrain = FindAnyObjectByType<PlayerBrain>();
-        }
-        
         _joystickImage = GetComponent<Image>();
         _rectTransform = GetComponent<RectTransform>();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        _isPointerHeld = true;
+
         if (_playerBrain != null)
-        _playerBrain.IsJoystickActive = true;
+            _playerBrain.IsJoystickActive = true;
 
         HandleJoystick(eventData.position, eventData.pressEventCamera);
     }
@@ -44,12 +42,12 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        _isPointerHeld = false;
         _inputVector = Vector2.zero;
-        ApplyInput();
 
         if (_playerBrain != null)
         {
-            _playerBrain.StopMoving();
+            _playerBrain.SetHorizontalInput(0f);
             _playerBrain.StandUp();
             _playerBrain.IsJoystickActive = false;
         }
@@ -60,9 +58,21 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
         {
             _joystickImage.sprite = _joystickSprites[0];
         }
+        
     }
 
-private void HandleJoystick(Vector2 screenPosition, Camera cam)
+    public void Initialize(PlayerBrain playerBrain)
+    {
+        _playerBrain = playerBrain;
+
+        if (_playerBrain == null)
+        {
+            Debug.LogError("[VirtualJoystick] PlayerBrain is null!");
+            return;
+        }
+    }
+
+    private void HandleJoystick(Vector2 screenPosition, Camera cam)
     {
         Vector2 localPoint;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, screenPosition, cam, out localPoint))
@@ -85,7 +95,6 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
             else if (x > _deadZone)
             {
                 _inputVector.x = 1f;
-                if(_playerBrain != null) _playerBrain.SetMoveRight();
                 // Спрайт вправо (индекс 2)
                 if (_joystickSprites.Length > 2 && _joystickSprites[2] != null) 
                     _joystickImage.sprite = _joystickSprites[2];
@@ -130,32 +139,19 @@ private void HandleJoystick(Vector2 screenPosition, Camera cam)
         }
     }
 
-    // private void ApplyInput()
-    // {
-    //     if (_playerBrain == null)
-    //         return;
-
-    //     _playerBrain.SetHorizontalInput(_inputVector.x);
-    // }
-
     private void ApplyInput()
     {
-        if (_playerBrain == null) return;
+        if (_playerBrain == null)
+            return;
 
-        if (_inputVector.x > 0)
-        {
-            _playerBrain.IsJoystickActive = true;
-            _playerBrain.SetMoveRight();
-        }
-        else if (_inputVector.x < 0)
-        {
-            _playerBrain.IsJoystickActive = true;
-            _playerBrain.SetMoveLeft();
-        }
-        else
-        {   
-            _playerBrain.IsJoystickActive = false;
-            _playerBrain.StopMoving();
-        }
+        if (!_isPointerHeld)
+            return;
+
+        // Джойстик активен, пока палец удерживается,
+        // даже если он находится в dead zone.
+        _playerBrain.IsJoystickActive = true;
+
+        _playerBrain.SetHorizontalInput(_inputVector.x);
     }
+
 }
