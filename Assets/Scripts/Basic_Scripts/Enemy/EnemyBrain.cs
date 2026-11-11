@@ -85,13 +85,13 @@ public class EnemyBrain : MonoBehaviour
 
     private void OnAttackCompleted()
     {
-        if (_enemy.CanAttackNow())
+            if (_health.IsDead)
         {
-            _stateMachine.RestartCurrentState();
+            ChangeState(_stateFactory.DieState);
             return;
         }
 
-        EvaluateNextState();
+        ChangeState(_stateFactory.IdleState);
     }
 
     private void EvaluateNextState()
