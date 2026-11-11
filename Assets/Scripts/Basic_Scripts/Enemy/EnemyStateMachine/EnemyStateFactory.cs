@@ -11,7 +11,8 @@ public class EnemyStateFactory
         EnemyMovement movement,
         EnemyTarget target,
         EnemyAnimation animation,
-        float fallbackTimeout
+        float attackFallbackTimeout,
+        float getDamageFallbackTimeout
         )
     {
         IdleState = new EnemyIdleState(movement, animation, target);
@@ -22,10 +23,10 @@ public class EnemyStateFactory
             movement,
             target,
             animation,
-            fallbackTimeout
+            attackFallbackTimeout
             );
 
-        DamagedState = new EnemyGetDamageState(movement, animation, fallbackTimeout);
+        DamagedState = new EnemyGetDamageState(movement, animation, getDamageFallbackTimeout);
         DieState = new EnemyDieState(movement, animation);
     }
 }

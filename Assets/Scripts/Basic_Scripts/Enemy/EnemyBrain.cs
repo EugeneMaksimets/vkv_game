@@ -8,7 +8,9 @@ using UnityEngine;
 public class EnemyBrain : MonoBehaviour
 {
     [Header("For Animation")]
-    [SerializeField] private float _fallbackTimeout = 2f;
+    [SerializeField] private float _attackFallbackTimeout = 2f;
+    [SerializeField] private float _getDamageFallbackTimeout = 1f;
+
     private Enemy _enemy;
     private EnemyMovement _movement;
     private EnemyAnimation _animation;
@@ -34,7 +36,8 @@ public class EnemyBrain : MonoBehaviour
             _movement,
             _target,
             _animation,
-            _fallbackTimeout
+            _attackFallbackTimeout,
+            _getDamageFallbackTimeout
             );
 
     }
@@ -175,6 +178,12 @@ public class EnemyBrain : MonoBehaviour
             return;
 
         EvaluateNextState();
+    }
+
+    private void OnValidate()
+    {
+        _attackFallbackTimeout = Mathf.Max(0.1f, _attackFallbackTimeout);
+        _getDamageFallbackTimeout = Mathf.Max(0.1f, _getDamageFallbackTimeout);
     }
 
 }
