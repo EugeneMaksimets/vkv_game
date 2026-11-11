@@ -149,7 +149,7 @@ public class EnemyBrain : MonoBehaviour
 
     private void OnDamaged()
     {
-        if (_health.IsDead || _stateFactory == null)
+        if (_health.IsDead || _stateFactory == null || _health.CurrentHealth <= 0f)
             return;
 
         if (_stateMachine.CurrentState == _stateFactory.DamagedState)

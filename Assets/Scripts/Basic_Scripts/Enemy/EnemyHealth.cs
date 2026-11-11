@@ -38,10 +38,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         DamageInfo appliedDamageInfo = damageInfo.WithAmount(appliedDamage);
 
         HealthChanged?.Invoke(this, CurrentHealth);
+        Damaged?.Invoke();
+        
         if (CurrentHealth <= 0f)
             Die();
-        else
-            Damaged?.Invoke();
     }
 
     public void RestoreFullHealth()
