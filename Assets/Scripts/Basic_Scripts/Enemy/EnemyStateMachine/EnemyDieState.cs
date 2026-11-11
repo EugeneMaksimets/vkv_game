@@ -14,6 +14,7 @@ public class EnemyDieState : IEnemyState
         _movement.Stop();
         _animation.PlayMoveAnimation(false);
         _animation.PlayDieAnimation();
+        _movement.DisablePhysics();
     }
 
     public void UpdateState()

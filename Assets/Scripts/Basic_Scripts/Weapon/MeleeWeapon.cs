@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(Collider2D))]
 public class MeleeWeapon : MonoBehaviour
 {
     [Header("Damage")]
@@ -15,8 +16,30 @@ public class MeleeWeapon : MonoBehaviour
     [SerializeField] private bool _ignoreTriggers = true;
 
     private readonly HashSet<Collider2D> _targetsInRange = new();
+    private Collider2D _hitboxCollider;
+    private EnemyHealth _ownerHealth;
 
     public event Action<IDamageable, DamageInfo> DamageDealt;
+
+    private void Awake()
+    {
+        _hitboxCollider = GetComponent<Collider2D>();
+        _ownerHealth = GetComponentInParent<EnemyHealth>();
+    }
+
+    private void OnEnable()
+    {
+        if (_ownerHealth != null)
+            _ownerHealth.Died += OnOwnerDied;
+    }
+
+    private void OnDisable() 
+    {
+        if (_ownerHealth != null)
+            _ownerHealth.Died -= OnOwnerDied;
+
+        _targetsInRange.Clear();
+    }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -81,16 +104,20 @@ public class MeleeWeapon : MonoBehaviour
         return true;
     }
 
+    private void OnOwnerDied()
+    {
+        if (_hitboxCollider != null)
+            _hitboxCollider.enabled = false;
+
+        _targetsInRange.Clear();
+        enabled = false;
+    }
+
     private void OnValidate()
     {
         _damageAmount = Mathf.Max(0f, _damageAmount);
         _knockbackSpeed = Mathf.Max(0f, _knockbackSpeed);
         _knockbackDuration = Mathf.Max(0f, _knockbackDuration);
-    }
-
-    private void OnDisable()
-    {
-        _targetsInRange.Clear();
     }
 
 }

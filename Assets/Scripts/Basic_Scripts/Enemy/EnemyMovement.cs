@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Перемещает врага по горизонтали и разворачивает его в сторону движения.
-/// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
 public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed = 2f;
@@ -19,6 +17,7 @@ public class EnemyMovement : MonoBehaviour
     public bool IsMoving => Mathf.Abs(_direction) > 0.01f;
 
     private Rigidbody2D _rigidbody;
+    private Collider2D _collider;
     private float _direction;
     private Vector3 _originalScale;
     private const float FacingDeadzone = 0.15f;
@@ -26,11 +25,14 @@ public class EnemyMovement : MonoBehaviour
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
+        _collider = GetComponent<Collider2D>();
         _originalScale = transform.localScale;
     }
 
     private void FixedUpdate()
     {
+        if (_rigidbody.bodyType != RigidbodyType2D.Dynamic)
+            return;
         _rigidbody.linearVelocity = new Vector2(
             _direction * _moveSpeed,
             _rigidbody.linearVelocity.y
@@ -78,6 +80,13 @@ public class EnemyMovement : MonoBehaviour
         {
             UpdateFacingDirection(deltaX);
         }
+    }
+
+    public void DisablePhysics()
+    {
+        _rigidbody.linearVelocity = Vector2.zero;
+        _rigidbody.bodyType = RigidbodyType2D.Kinematic;
+        _collider.enabled = false;
     }
 
     private void UpdateFacingDirection(float dir)
