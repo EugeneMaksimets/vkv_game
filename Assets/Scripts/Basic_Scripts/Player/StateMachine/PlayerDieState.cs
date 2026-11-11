@@ -1,23 +1,21 @@
-
 using UnityEngine;
 
 public class PlayerDieState : IPlayerState
 {
-    private readonly PlayerBrain _playerBrain;
+    private readonly PlayerMovement _playerMovement;
+    private readonly PlayerAnimation _playerAnimation;
 
-    public PlayerDieState(PlayerBrain playerBrain)
+    public PlayerDieState(PlayerMovement movement, PlayerAnimation animation)
     {
-        _playerBrain = playerBrain;
+        _playerMovement = movement;
+        _playerAnimation = animation;
     }
 
     public void Enter()
     {
-        _playerBrain.Rb.linearVelocity = new Vector2(
-            0f,
-            _playerBrain.Rb.linearVelocity.y
-        );
+        _playerMovement.StopHorizontalMovement();
 
-        _playerBrain.Animation.PlayDie();
+        _playerAnimation.PlayDie();
     }
 
     public void UpdateState()

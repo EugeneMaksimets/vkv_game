@@ -1,40 +1,26 @@
+using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerAnimation))]
-[RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerInteraction))]
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerBrain : MonoBehaviour
 {
-    private PlayerMovement _playerMovement;
-    private bool _isJoystickActive;
+    [Header("Attack")]
+    [SerializeField, Min(0.01f)]
+    private float _attackDuration = 0.5f;
 
     [Header("Components")]
-    public Rigidbody2D Rb { get; private set; }
     public PlayerAnimation Animation { get; private set; }
-    public BoxCollider2D Collider { get; private set; }
     public PlayerInteraction Interaction { get; private set; }
     public PlayerHealth Health { get; private set; }
 
     public DamageInfo LastDamageInfo { get; private set; }
+    public PlayerMovement Movement { get; private set; }
+    public bool IsJoystickActive { get; set; }
 
-    [Header("Input")]
-    [System.Obsolete(
-        "Use PlayerMovement.HorizontalInput instead. " +
-        "This property will be removed during state refactoring."
-    )]
-    public float HorizontalInput => _playerMovement.HorizontalInput;
-
-    public bool IsGrounded => _playerMovement.IsGrounded;
-    public float JumpForce => _playerMovement.JumpForce;
-
-    public bool IsJoystickActive
-    {
-        get => _isJoystickActive;
-        set => _isJoystickActive = value;
-    }
+    public bool IsGrounded => Movement.IsGrounded;
 
     [Header("Health State Settings")]
     [SerializeField] private float _getDamageDuration = 0.25f;
@@ -71,18 +57,15 @@ public class PlayerBrain : MonoBehaviour
 
     private void Awake()
     {
-        _playerMovement = GetComponent<PlayerMovement>();
-
-        Rb = GetComponent<Rigidbody2D>();
         Animation = GetComponent<PlayerAnimation>();
-        Collider = GetComponent<BoxCollider2D>();
         Interaction = GetComponent<PlayerInteraction>();
         Health = GetComponent<PlayerHealth>();
+        Movement = GetComponent<PlayerMovement>();
 
 
         StateMachine = new PlayerStateMachine();
 
-        StateFactory = new PlayerStateFactory(this);
+        StateFactory = new PlayerStateFactory(this, Movement, Animation, Interaction, Health, _attackDuration);
         StateFactory.CreateStates();
 
         IdleState = StateFactory.IdleState;
@@ -118,7 +101,6 @@ public class PlayerBrain : MonoBehaviour
 
     private void Update()
     {
-        // Animator.SetBool("IsGrounded", IsGrounded);
         Animation.SetGrounded(IsGrounded);
 
         HandleMovementStateTransition();
@@ -131,13 +113,13 @@ public class PlayerBrain : MonoBehaviour
 
     public void SetHorizontalInput(float input)
     {
-        if (IsControlLocked)
+        if (IsControlLocked || StateMachine.CurrentState == AttackState)
         {
-            _playerMovement.SetHorizontalInput(0f);
+            Movement.SetHorizontalInput(0f);
             return;
         }
 
-        _playerMovement.SetHorizontalInput(input);
+        Movement.SetHorizontalInput(input);
         
     }
 
@@ -153,21 +135,30 @@ public class PlayerBrain : MonoBehaviour
 
     private void HandleMovementStateTransition()
     {
-        if (IsControlLocked || !IsGrounded)
+        if (IsControlLocked)
             return;
 
         IPlayerState currentState = StateMachine.CurrentState;
 
-        float horizontalInput = _playerMovement.HorizontalInput;
+        float horizontalInput = Movement.HorizontalInput;
+
+        if(currentState == JumpState)
+        {
+            if(!JumpState.HasLeftGround || !Movement.IsGrounded || Movement.VerticalVelocity > 0.01f)
+                return;
+        
+            if(Math.Abs(horizontalInput) > 0.1f)
+                StateMachine.ChangeState(RunState);
+            else
+                StateMachine.ChangeState(IdleState);
+
+            return;
+        }
 
         if (currentState == IdleState && Mathf.Abs(horizontalInput) > 0.1f)
-        {
             StateMachine.ChangeState(RunState);
-        }
         else if (currentState == RunState && Mathf.Abs(horizontalInput) <= 0.1f)
-        {
             StateMachine.ChangeState(IdleState);
-        }
     }
 
     public void Jump()
@@ -175,7 +166,7 @@ public class PlayerBrain : MonoBehaviour
         if (IsControlLocked || !CanJump())
             return;
 
-        _playerMovement.Jump();
+        Movement.Jump();
 
         StateMachine.ChangeState(JumpState);
     }
@@ -205,7 +196,6 @@ public class PlayerBrain : MonoBehaviour
 
         StateMachine.ChangeState(CrouchState);
 
-        _playerMovement.SetCrouching(true);
     }
 
     public void StandUp()
@@ -213,9 +203,7 @@ public class PlayerBrain : MonoBehaviour
         if (StateMachine.CurrentState != CrouchState)
             return;
 
-        _playerMovement.SetCrouching(false);
-
-        if (Mathf.Abs(_playerMovement.HorizontalInput) > 0.1f)
+        if (Mathf.Abs(Movement.HorizontalInput) > 0.1f)
         {
             StateMachine.ChangeState(RunState);
         }
@@ -267,16 +255,7 @@ public class PlayerBrain : MonoBehaviour
 
     public void ApplyHitKnockback(DamageInfo damageInfo)
     {
-        float duration = Mathf.Min(
-            damageInfo.KnockbackDuration,
-            _getDamageDuration
-        );
-
-        _playerMovement.ApplyKnockback(
-            damageInfo.SourcePosition,
-            damageInfo.KnockbackSpeed,
-            duration
-        );
+        Movement.ApplyHitKnockback(damageInfo, _getDamageDuration);
     }
 
     private void HandleDamaged(
@@ -288,7 +267,7 @@ public class PlayerBrain : MonoBehaviour
         if (health.CurrentHealth > 0f)
         {
             StopMoving();
-            _playerMovement.SetCrouching(false);
+            Movement.SetCrouching(false);
             StateMachine.ChangeState(GetDamageState);
         }
     }
@@ -296,23 +275,18 @@ public class PlayerBrain : MonoBehaviour
     private void HandleDied(PlayerHealth health)
     {
         StopMoving();
-        _playerMovement.SetCrouching(false);
-        _isJoystickActive = false;
+        Movement.SetCrouching(false);
+        IsJoystickActive = false;
         StateMachine.ChangeState(DieState);
     }
 
     private void HandleRevived(PlayerHealth health)
     {
         StopMoving();
-        _playerMovement.SetCrouching(false);
-        _isJoystickActive = false;
+        Movement.SetCrouching(false);
+        IsJoystickActive = false;
         StateMachine.ChangeState(IdleState);
     }
-
-    #endregion
-
-    #region Facing Direction
-
 
     #endregion
 

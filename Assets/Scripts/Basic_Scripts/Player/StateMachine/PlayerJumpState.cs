@@ -3,48 +3,29 @@ using UnityEngine;
 
 public class PlayerJumpState : IPlayerState
 {
-    private readonly PlayerBrain _playerBrain;
-    private bool _hasLeftGround;
+    private readonly PlayerMovement _playerMovement;
+    private readonly PlayerAnimation _playerAnimation;
 
-    public PlayerJumpState(PlayerBrain playerBrain)
+    public bool HasLeftGround { get; private set; }
+
+    public PlayerJumpState(PlayerMovement movement, PlayerAnimation animation)
     {
-        _playerBrain = playerBrain;
+        _playerMovement = movement;
+        _playerAnimation = animation;
     }
 
     public void Enter()
     {
-        _hasLeftGround = false;
+        HasLeftGround = false;
 
-        _playerBrain.Animation.PlayJump();
+        _playerAnimation.PlayJump();
     }
 
     public void UpdateState()
     {
-        if (!_hasLeftGround)
+        if (!HasLeftGround && !_playerMovement.IsGrounded)
         {
-            if (!_playerBrain.IsGrounded)
-            {
-                _hasLeftGround = true;
-            }
-
-            return;
-        }
-
-        if (_playerBrain.IsGrounded &&
-            _playerBrain.Rb.linearVelocity.y <= 0.01f)
-        {
-            if (Mathf.Abs(_playerBrain.HorizontalInput) > 0.1f)
-            {
-                _playerBrain.StateMachine.ChangeState(
-                    _playerBrain.RunState
-                );
-            }
-            else
-            {
-                _playerBrain.StateMachine.ChangeState(
-                    _playerBrain.IdleState
-                );
-            }
+            HasLeftGround = true;
         }
     }
 

@@ -1,26 +1,34 @@
+using System;
 
 public class PlayerInteractState : IPlayerState
 {
     private readonly PlayerBrain _playerBrain;
+    private readonly PlayerInteraction _playerInteraction;
+    private readonly PlayerAnimation _playerAnimation;
+    private const string TagPickUpItem = "pick_up_item";
 
-    public PlayerInteractState(PlayerBrain playerBrain)
+    public PlayerInteractState(
+        PlayerBrain playerBrain,
+        PlayerInteraction playerInteraction,
+        PlayerAnimation playerAnimation)
     {
         _playerBrain = playerBrain;
+        _playerInteraction = playerInteraction;
+        _playerAnimation = playerAnimation;
     }
 
     public void Enter()
     {
-        var interactable = _playerBrain.Interaction;
+        var interactable = _playerInteraction.CurrentInteractable;
 
-        if (interactable != null &&
-            interactable.CurrentInteractable != null)
+        if (interactable != null)
         {
-            if (interactable.CurrentTag == "pick_up_item")
+            if (_playerInteraction.CurrentTag == TagPickUpItem)
             {
-                _playerBrain.Animation.PlayPickUpItem();
+                _playerAnimation.PlayPickUpItem();
             }
 
-            interactable.CurrentInteractable.Interact();
+            interactable.Interact();
         }
 
         // TODO: Пересмотреть переход после анимации.

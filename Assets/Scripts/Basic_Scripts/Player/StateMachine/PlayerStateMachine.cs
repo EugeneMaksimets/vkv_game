@@ -9,6 +9,9 @@ public class PlayerStateMachine {
 
     public void ChangeState(IPlayerState newState)
     {
+        if (newState == null || CurrentState == newState)
+            return;
+
         CurrentState?.Exit();
         CurrentState = newState;
         CurrentState.Enter();

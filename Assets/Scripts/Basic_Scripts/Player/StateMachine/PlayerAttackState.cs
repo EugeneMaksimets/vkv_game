@@ -4,20 +4,28 @@ using UnityEngine;
 public class PlayerAttackState : IPlayerState
 {
     private readonly PlayerBrain _playerBrain;
+    private readonly PlayerMovement _playerMovement;
+    private readonly PlayerAnimation _playerAnimation;
+    private readonly float _attackDuration;
 
     private float _attackTimer;
-    private readonly float _attackDuration = 0.5f;
-
-    public PlayerAttackState(PlayerBrain playerBrain)
+    
+    public PlayerAttackState(
+        PlayerBrain playerBrain,
+        PlayerMovement playerMovement,
+        PlayerAnimation playerAnimation,
+        float attackDuration)
     {
         _playerBrain = playerBrain;
+        _playerMovement = playerMovement;
+        _playerAnimation = playerAnimation;
+        _attackDuration = attackDuration;
     }
 
     public void Enter()
     {
-        _playerBrain.StopMoving();
-
-        _playerBrain.Animation.PlayAttack();
+        _playerMovement.StopHorizontalMovement();
+        _playerAnimation.PlayAttack();
 
         _attackTimer = _attackDuration;
     }
@@ -28,7 +36,7 @@ public class PlayerAttackState : IPlayerState
 
         if (_attackTimer <= 0f)
         {
-            if (Mathf.Abs(_playerBrain.HorizontalInput) > 0.1f)
+            if (Mathf.Abs(_playerMovement.HorizontalInput) > 0.1f)
             {
                 _playerBrain.StateMachine.ChangeState(
                     _playerBrain.RunState

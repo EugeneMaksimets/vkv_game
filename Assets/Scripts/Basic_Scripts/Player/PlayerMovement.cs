@@ -26,12 +26,13 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsGrounded { get; private set; }
     public float JumpForce => _jumpForce;
+    public float VerticalVelocity => Rb.linearVelocity.y;
     public Vector2 OriginalColliderSize { get; private set; }
     public Vector2 OriginalColliderOffset { get; private set; }
     public float HorizontalInput { get; private set; }
 
     private float _knockbackVelocityX;
-    private float _knockbackTimeReminging;
+    private float _knockbackTimeRemaining;
     private bool _isCrouching;
     private Vector3 _originalScale;
 
@@ -50,15 +51,15 @@ public class PlayerMovement : MonoBehaviour
     {
         float horizontalVelocity;
 
-        if(_knockbackTimeReminging > 0f)
+        if(_knockbackTimeRemaining > 0f)
         {
             // Пока действует отбрасывание, ввод игрока не влияет на X-скорость.
             horizontalVelocity = _knockbackVelocityX;
-            _knockbackTimeReminging -= Time.fixedDeltaTime;
+            _knockbackTimeRemaining -= Time.fixedDeltaTime;
         }
         else
         {
-            _knockbackTimeReminging = 0f;
+            _knockbackTimeRemaining = 0f;
             _knockbackVelocityX = 0f;
             
             float speed = _isCrouching
@@ -92,10 +93,14 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetHorizontalInput(float input)
     {
-        HorizontalInput = Mathf.Clamp(input, -1f, 1f);
+        float clampedInput = Mathf.Clamp(input, -1f, 1f);
+
+        if (Mathf.Approximately(HorizontalInput, clampedInput))
+            return;
+
+        HorizontalInput = clampedInput;
 
         UpdateFacingDirection();
-
     }
 
 
@@ -162,25 +167,48 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// Отталкивает игрока в сторону от источника попадания.
     /// </summary>
+    public void ApplyHitKnockback(
+        DamageInfo damageInfo,
+        float maxDuration)
+    {
+        float duration = Mathf.Min(
+            damageInfo.KnockbackDuration,
+            maxDuration
+        );
+
+        ApplyKnockback(
+            damageInfo.SourcePosition,
+            damageInfo.KnockbackSpeed,
+            duration
+        );
+    }
     public void ApplyKnockback(
         Vector2 sourcePosition,
         float speed,
-        float duraction)
+        float duration)
     {
-        if (speed <= 0f || duraction <= 0f)
+        if (speed <= 0f || duration <= 0f)
             return;
 
-        float diffirenceX = Rb.position.x - sourcePosition.x;
+        float differenceX = Rb.position.x - sourcePosition.x;
 
         // Враг слева — игрок летит вправо.
         // Враг справа — игрок летит влево.
-        float direction = Mathf.Abs (diffirenceX) > 0.01f 
-            ? Mathf.Sign(diffirenceX) 
+        float direction = Mathf.Abs (differenceX) > 0.01f 
+            ? Mathf.Sign(differenceX) 
             : transform.localScale.x >= 0f ? -1f : 1f;
 
         SetHorizontalInput(0f);
         _knockbackVelocityX = direction * speed;
-        _knockbackTimeReminging = duraction;
+        _knockbackTimeRemaining = duration;
+    }
+
+    public void StopHorizontalMovement()
+    {
+        Rb.linearVelocity = new Vector2(
+            0f,
+            Rb.linearVelocity.y
+        );
     }
 
    

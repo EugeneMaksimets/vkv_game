@@ -3,27 +3,31 @@ using UnityEngine;
 
 public class PlayerCrouchState : IPlayerState
 {
-    private readonly PlayerBrain _playerBrain;
+    private readonly PlayerMovement _playerMovement;
+    private readonly PlayerAnimation _playerAnimation;
 
-    public PlayerCrouchState(PlayerBrain playerBrain)
+    public PlayerCrouchState(PlayerMovement movement, PlayerAnimation animation)
     {
-        _playerBrain = playerBrain;
+        _playerMovement = movement;
+        _playerAnimation = animation;
     }
 
     public void Enter()
     {
-        _playerBrain.Animation.SetCrouching(true);
+        _playerAnimation.SetCrouching(true);
+        _playerMovement.SetCrouching(true);
     }
 
     public void UpdateState()
     {
-        _playerBrain.Animation.SetSpeed(
-            Mathf.Abs(_playerBrain.HorizontalInput)
+        _playerAnimation.SetSpeed(
+            Mathf.Abs(_playerMovement.HorizontalInput)
         );
     }
 
     public void Exit()
     {
-        _playerBrain.Animation.SetCrouching(false);
+        _playerAnimation.SetCrouching(false);
+        _playerMovement.SetCrouching(false);
     }
 }

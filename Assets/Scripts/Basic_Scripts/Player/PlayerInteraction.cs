@@ -13,7 +13,8 @@ public class PlayerInteraction : MonoBehaviour
     private readonly List<Collider2D> _invalidColliders = new();
     private IInteractable _currentInteractable;
     public IInteractable CurrentInteractable => _currentInteractable;
-    public bool HasInteractable => CurrentInteractable != null;
+    public bool HasInteractable =>
+    CurrentInteractable is UnityEngine.Object unityObject && unityObject != null;
     public string CurrentTag => (CurrentInteractable as MonoBehaviour)?.tag;
 
 

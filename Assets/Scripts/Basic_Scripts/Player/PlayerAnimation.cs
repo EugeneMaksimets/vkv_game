@@ -52,7 +52,6 @@ public class PlayerAnimation : MonoBehaviour
 
     public void PlayJump()
     {
-        _animator.ResetTrigger(JumpHash);
         _animator.SetTrigger(JumpHash);
     }
 
