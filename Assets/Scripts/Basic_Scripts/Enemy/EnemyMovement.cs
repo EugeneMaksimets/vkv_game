@@ -59,6 +59,11 @@ public class EnemyMovement : MonoBehaviour
 
     public void SetDirection(float direction)
     {
+        if (!_isMovementEnabled) 
+        { 
+            Stop();
+            return; 
+        }
         _direction = Mathf.Clamp(direction, -1f, 1f);
 
         if (Mathf.Abs(_direction) > 0.01f)
