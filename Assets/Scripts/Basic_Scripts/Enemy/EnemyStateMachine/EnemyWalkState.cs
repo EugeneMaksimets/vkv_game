@@ -13,11 +13,20 @@ public class EnemyWalkState : IEnemyState
 
     public void Enter()
     {
+        if(!_movement.IsMovementEnabled)
+            return;
         _animation.PlayMoveAnimation(true);
     }
 
     public void UpdateState()
     {
+        if(!_movement.IsMovementEnabled)
+        {
+            _movement.Stop();
+            _animation.PlayMoveAnimation(false);
+            return;
+        }
+
         _movement.MoveTowards(_target.TargetTransform);
     }
 
