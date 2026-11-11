@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -8,6 +9,10 @@ public class EnemyAnimation : MonoBehaviour
     [SerializeField] private string _attackTrigger = "Attack";
     [SerializeField] private string _getDamageTrigger = "GetDamage";
     [SerializeField] private string _dieTrigger = "Die";
+
+    public event Action AttackHit;
+    public event Action AttackFinished;
+    public event Action GetDamageFinished;
 
     private Animator _animator;
 
@@ -44,5 +49,20 @@ public class EnemyAnimation : MonoBehaviour
     public void PlayDieAnimation()
     {
         _animator.SetTrigger(_dieTriggerHash);
+    }
+
+    public void OnAttackHit()
+    {
+        AttackHit?.Invoke();
+    }
+
+    public void OnAttackFinished()
+    {
+        AttackFinished?.Invoke();
+    }
+
+        public void OnGetDamageFinished()
+    {
+        GetDamageFinished?.Invoke();
     }
 }

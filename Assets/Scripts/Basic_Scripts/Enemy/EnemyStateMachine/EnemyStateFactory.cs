@@ -6,11 +6,23 @@ public class EnemyStateFactory
     public EnemyGetDamageState DamagedState { get; }
     public EnemyDieState DieState { get; }
 
-    public EnemyStateFactory(EnemyMovement movement, EnemyTarget target, EnemyAnimation animation)
+    public EnemyStateFactory(
+        Enemy enemy,
+        EnemyMovement movement,
+        EnemyTarget target,
+        EnemyAnimation animation
+        )
     {
         IdleState = new EnemyIdleState(movement, animation);
         WalkState = new EnemyWalkState(movement, target, animation);
-        AttackState = new EnemyAttackState(movement, target, animation);
+
+        AttackState = new EnemyAttackState(
+            enemy,
+            movement,
+            target,
+            animation
+            );
+
         DamagedState = new EnemyGetDamageState(movement, animation);
         DieState = new EnemyDieState(movement, animation);
     }

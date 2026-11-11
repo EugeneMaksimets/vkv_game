@@ -1,16 +1,12 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Enemy))]
 [RequireComponent(typeof(EnemyMovement))]
 [RequireComponent(typeof(EnemyAnimation))]
 [RequireComponent(typeof(EnemyHealth))]
 [RequireComponent(typeof(EnemyTarget))]
 public class EnemyBrain : MonoBehaviour
 {
-    [Header("State Timing")]
-    [SerializeField] private float _attackDuration = 0.8f;
-    [SerializeField] private float _attackDamageTime = 0.4f;
-    [SerializeField] private float _getDamageDuration = 0.5f;
-
     private Enemy _enemy;
     private EnemyMovement _movement;
     private EnemyAnimation _animation;
@@ -20,27 +16,6 @@ public class EnemyBrain : MonoBehaviour
     private EnemyStateMachine _stateMachine;
     private EnemyStateFactory _stateFactory;
 
-    private float _stateTimer;
-    private bool _damageAttempted;
-
-    private void OnEnable()
-    {
-        if(_health == null)
-            return;
-
-        _health.Damaged += OnDamaged;
-        _health.Died += OnDied;
-    }
-
-    private void OnDisable()
-    {
-        if(_health == null)
-            return;
-
-        _health.Damaged -= OnDamaged;
-        _health.Died -= OnDied;
-    }
-
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
@@ -49,17 +24,6 @@ public class EnemyBrain : MonoBehaviour
         _health = GetComponent<EnemyHealth>();
         _target = GetComponent<EnemyTarget>();
 
-        if (_enemy == null)
-        {
-            Debug.LogError(
-                $"{nameof(EnemyBrain)} requires a component derived from Enemy.",
-                this
-            );
-            enabled = false;
-            return;
-        }
-
-        
     }
 
     private void Start()
@@ -67,24 +31,35 @@ public class EnemyBrain : MonoBehaviour
         InitializeStateMachine();
     }
 
+    private void OnEnable()
+    {
+        if (_health == null)
+            return;
+
+        _health.Damaged += OnDamaged;
+        _health.Died += OnDied;
+    }
+
+    private void OnDisable()
+    {
+        if (_health == null)
+            return;
+
+        _health.Damaged -= OnDamaged;
+        _health.Died -= OnDied;
+    }
 
     private void Update()
     {
-        if (_stateMachine == null || _stateFactory == null || _stateMachine.CurrentState == null)
+        if (_stateMachine == null ||
+            _stateFactory == null ||
+            _stateMachine.CurrentState == null)
         {
             return;
         }
-        _stateMachine.CurrentState.UpdateState();
 
-        if(_stateMachine.CurrentState == _stateFactory.AttackState)
-        {
-            UpdateAttackState();
-        }
-        else if (_stateMachine.CurrentState == _stateFactory.DamagedState)
-        {
-            UpdateGetDamageState();
-        }
-        else if (_stateMachine.CurrentState == _stateFactory.IdleState ||
+        _stateMachine.Update();
+        if (_stateMachine.CurrentState == _stateFactory.IdleState ||
                  _stateMachine.CurrentState == _stateFactory.WalkState)
         {
             EvaluateNextState();
@@ -95,23 +70,44 @@ public class EnemyBrain : MonoBehaviour
     {
         _stateMachine = new EnemyStateMachine();
 
-        _stateFactory = new EnemyStateFactory(_movement, _target, _animation);
+        _stateFactory = new EnemyStateFactory(
+            _enemy,
+            _movement,
+            _target,
+            _animation
+            );
+
+        _stateFactory.AttackState.AttackCompleted += OnAttackCompleted;
+        _stateFactory.DamagedState.DamageStateCompleted += OnDamageStateCompleted;
+
         _stateMachine.Initialize(_stateFactory.IdleState);
+    }
+
+    private void OnAttackCompleted()
+    {
+        if (_enemy.CanAttackNow())
+        {
+            _stateMachine.RestartCurrentState();
+            return;
+        }
+
+        EvaluateNextState();
     }
 
     private void EvaluateNextState()
     {
-        if(_health.IsDead)
+        if (_health.IsDead)
         {
             ChangeState(_stateFactory.DieState);
             return;
         }
 
-        if(_target.TargetTransform == null)
+        if (_target.TargetTransform == null)
         {
             ChangeState(_stateFactory.IdleState);
             return;
         }
+
         if (_enemy.CanAttackNow())
         {
             ChangeState(_stateFactory.AttackState);
@@ -122,47 +118,14 @@ public class EnemyBrain : MonoBehaviour
         {
             return;
         }
+
         if (_movement.CanEnterWalkState)
         {
             ChangeState(_stateFactory.WalkState);
             return;
         }
+
         ChangeState(_stateFactory.IdleState);
-    }
-
-    private void UpdateAttackState()
-    {
-        
-        _stateTimer += Time.deltaTime;
-
-        if (!_damageAttempted && _stateTimer >= _attackDamageTime)
-        {
-            _enemy.TryAttack();
-            _damageAttempted = true;
-        }
-
-        if (_stateTimer >= _attackDuration)
-        {
-            if (_enemy.CanAttackNow())
-            {
-                ResetTimer();
-                _stateMachine.RestartCurrentState();
-                return;
-            }
-
-            EvaluateNextState();
-        }
-                
-    }
-
-    private void UpdateGetDamageState()
-    {
-        _stateTimer += Time.deltaTime;
-
-        if (_stateTimer >= _getDamageDuration)
-        {
-            EvaluateNextState();
-        }
     }
 
     private void ChangeState(IEnemyState newState)
@@ -172,27 +135,18 @@ public class EnemyBrain : MonoBehaviour
 
         if (_stateMachine.CurrentState == newState)
             return;
-        
-        ResetTimer();
 
         _stateMachine.ChangeState(newState);
     }
 
-    private void ResetTimer()
-    {
-        _stateTimer = 0f;
-        _damageAttempted = false;
-    }
-
     private void OnDamaged()
     {
-        if(_health.IsDead)
+        if (_health.IsDead)
             return;
 
-        if(_stateMachine.CurrentState == _stateFactory.DamagedState)
+        if (_stateMachine.CurrentState == _stateFactory.DamagedState)
         {
             _stateMachine.RestartCurrentState();
-            ResetTimer();
             return;
         }
 
@@ -204,14 +158,21 @@ public class EnemyBrain : MonoBehaviour
         ChangeState(_stateFactory.DieState);
     }
 
-    private void OnValidate()
+    private void OnDestroy()
     {
-        _attackDuration = Mathf.Max(0.01f, _attackDuration);
-        _attackDamageTime = Mathf.Clamp(
-            _attackDamageTime,
-            0f,
-            _attackDuration);
+       if (_stateFactory == null)
+        return;
 
-        _getDamageDuration = Mathf.Max(0.01f, _getDamageDuration);
+        _stateFactory.AttackState.AttackCompleted -= OnAttackCompleted;
+        _stateFactory.DamagedState.DamageStateCompleted -= OnDamageStateCompleted;
     }
+
+    private void OnDamageStateCompleted()
+    {
+        if (_stateMachine.CurrentState != _stateFactory.DamagedState)
+            return;
+
+        EvaluateNextState();
+    }
+
 }

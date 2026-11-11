@@ -7,6 +7,9 @@ public class EnemyStateMachine
 
     public void Initialize(IEnemyState startingState)
     {
+        if(startingState == null || CurrentState != null)
+            return;
+            
         CurrentState = startingState;
         CurrentState.Enter();
     }
