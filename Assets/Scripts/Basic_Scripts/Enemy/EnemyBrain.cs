@@ -7,6 +7,8 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyTarget))]
 public class EnemyBrain : MonoBehaviour
 {
+    [Header("For Animation")]
+    [SerializeField] private float _fallbackTimeout = 2f;
     private Enemy _enemy;
     private EnemyMovement _movement;
     private EnemyAnimation _animation;
@@ -24,6 +26,16 @@ public class EnemyBrain : MonoBehaviour
         _health = GetComponent<EnemyHealth>();
         _target = GetComponent<EnemyTarget>();
 
+        _stateMachine = new EnemyStateMachine();
+
+        _stateFactory = new EnemyStateFactory(
+            _enemy,
+            _movement,
+            _target,
+            _animation,
+            _fallbackTimeout
+            );
+
     }
 
     private void Start()
@@ -33,20 +45,20 @@ public class EnemyBrain : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_health == null)
-            return;
-
         _health.Damaged += OnDamaged;
         _health.Died += OnDied;
+
+        _stateFactory.AttackState.AttackCompleted += OnAttackCompleted;
+        _stateFactory.DamagedState.DamageStateCompleted += OnDamageStateCompleted;
     }
 
     private void OnDisable()
     {
-        if (_health == null)
-            return;
-
         _health.Damaged -= OnDamaged;
         _health.Died -= OnDied;
+
+        _stateFactory.AttackState.AttackCompleted -= OnAttackCompleted;
+        _stateFactory.DamagedState.DamageStateCompleted -= OnDamageStateCompleted;
     }
 
     private void Update()
@@ -68,18 +80,6 @@ public class EnemyBrain : MonoBehaviour
 
     private void InitializeStateMachine()
     {
-        _stateMachine = new EnemyStateMachine();
-
-        _stateFactory = new EnemyStateFactory(
-            _enemy,
-            _movement,
-            _target,
-            _animation
-            );
-
-        _stateFactory.AttackState.AttackCompleted += OnAttackCompleted;
-        _stateFactory.DamagedState.DamageStateCompleted += OnDamageStateCompleted;
-
         _stateMachine.Initialize(_stateFactory.IdleState);
     }
 
@@ -116,10 +116,11 @@ public class EnemyBrain : MonoBehaviour
 
         if (_enemy.IsTargetInRange())
         {
+            ChangeState(_stateFactory.IdleState);
             return;
         }
 
-        if (_movement.CanEnterWalkState)
+        if (_movement.IsMovementEnabled)
         {
             ChangeState(_stateFactory.WalkState);
             return;
@@ -141,7 +142,7 @@ public class EnemyBrain : MonoBehaviour
 
     private void OnDamaged()
     {
-        if (_health.IsDead)
+        if (_health.IsDead || _stateFactory == null)
             return;
 
         if (_stateMachine.CurrentState == _stateFactory.DamagedState)
@@ -155,16 +156,10 @@ public class EnemyBrain : MonoBehaviour
 
     private void OnDied()
     {
+        if (_stateFactory == null)
+            return;
+
         ChangeState(_stateFactory.DieState);
-    }
-
-    private void OnDestroy()
-    {
-       if (_stateFactory == null)
-        return;
-
-        _stateFactory.AttackState.AttackCompleted -= OnAttackCompleted;
-        _stateFactory.DamagedState.DamageStateCompleted -= OnDamageStateCompleted;
     }
 
     private void OnDamageStateCompleted()

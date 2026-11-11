@@ -7,9 +7,11 @@ public class EnemyAttackState : IEnemyState
     private readonly EnemyMovement _movement;
     private readonly EnemyTarget _target;
     private readonly EnemyAnimation _animation;
+    private readonly float _fallbackTimeout;
 
     private bool _damageAttempted;
     private bool _attackCompleted;
+    private float _timer;
 
     public event Action AttackCompleted;
 
@@ -17,18 +19,21 @@ public class EnemyAttackState : IEnemyState
         Enemy enemy,
         EnemyMovement movement,
         EnemyTarget target,
-        EnemyAnimation animation)
+        EnemyAnimation animation,
+        float fallbackTimeout = 2f)
     {
         _enemy = enemy;
         _movement = movement;
         _target = target;
         _animation = animation;
+        _fallbackTimeout = fallbackTimeout;
     }
 
     public void Enter()
     {
         _damageAttempted = false;
         _attackCompleted = false;
+        _timer = 0f;
 
         _animation.AttackHit += OnAttackHit;
         _animation.AttackFinished += OnAttackFinished;
@@ -42,7 +47,15 @@ public class EnemyAttackState : IEnemyState
 
     public void UpdateState()
     {
-        
+        if (_attackCompleted)
+            return;
+
+        _timer += Time.deltaTime;
+        if (_timer >= _fallbackTimeout)
+        {
+            Debug.LogWarning($"{nameof(EnemyAttackState)}: Animation event AttackFinished missed, triggered fallback timeout.");
+            OnAttackFinished();
+        }
     }
 
     public void Exit()

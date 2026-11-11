@@ -4,7 +4,6 @@ using UnityEngine;
 public class EnemyMelee : Enemy
 {
     [Header("Attack Settings")]
-    [SerializeField] private float _attackRange = 2.5f;
     [SerializeField] private float _attackCooldown = 1f;
 
     [Header("Weapon")]
@@ -34,8 +33,10 @@ public class EnemyMelee : Enemy
 
     public override void TryAttack()
     {
-        if (!CanAttackNow())
+        if (Health.IsDead)
             return;
+
+        _nextAttackTime = Time.time + _attackCooldown;
 
         Transform targetTransform = Target.TargetTransform;
 
@@ -48,21 +49,11 @@ public class EnemyMelee : Enemy
 
         AttackStarted?.Invoke(targetTransform);
 
-        _nextAttackTime = Time.time + _attackCooldown;
     }
 
     public override bool IsTargetInRange()
     {
-        Transform targetTransform = Target.TargetTransform;
-
-        if (targetTransform == null)
-            return false;
-
-        float rangeSquared = _attackRange * _attackRange;
-
-        Vector2 offset = targetTransform.position - transform.position;
-
-        return offset.sqrMagnitude <= rangeSquared;
+        return _meleeWeapon.CanHit(Target.TargetTransform);
     }
 
     public override bool CanAttackNow()
@@ -74,7 +65,6 @@ public class EnemyMelee : Enemy
 
     private void OnValidate()
     {
-        _attackRange = Mathf.Max(0f, _attackRange);
         _attackCooldown = Mathf.Max(0.01f, _attackCooldown);
     }
 }

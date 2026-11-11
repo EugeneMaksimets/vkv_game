@@ -10,20 +10,22 @@ public class EnemyStateFactory
         Enemy enemy,
         EnemyMovement movement,
         EnemyTarget target,
-        EnemyAnimation animation
+        EnemyAnimation animation,
+        float fallbackTimeout
         )
     {
-        IdleState = new EnemyIdleState(movement, animation);
+        IdleState = new EnemyIdleState(movement, animation, target);
         WalkState = new EnemyWalkState(movement, target, animation);
 
         AttackState = new EnemyAttackState(
             enemy,
             movement,
             target,
-            animation
+            animation,
+            fallbackTimeout
             );
 
-        DamagedState = new EnemyGetDamageState(movement, animation);
+        DamagedState = new EnemyGetDamageState(movement, animation, fallbackTimeout);
         DieState = new EnemyDieState(movement, animation);
     }
 }

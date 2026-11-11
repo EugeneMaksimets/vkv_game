@@ -8,11 +8,11 @@ public class EnemyMovement : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed = 2f;
 
-    [SerializeField] private bool _canEnterWalkState = false;
-    public bool CanEnterWalkState
+    [SerializeField] private bool _isMovementEnabled = false;
+    public bool IsMovementEnabled
     {
-        get => _canEnterWalkState;
-        set => _canEnterWalkState = value;
+        get => _isMovementEnabled;
+        set => _isMovementEnabled = value;
     }
 
     public float MoveSpeed => _moveSpeed;

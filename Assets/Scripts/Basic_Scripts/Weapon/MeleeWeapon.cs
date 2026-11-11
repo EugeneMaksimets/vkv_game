@@ -11,31 +11,60 @@ public class MeleeWeapon : MonoBehaviour
     [SerializeField] private float _knockbackSpeed = 3f;
     [SerializeField] private float _knockbackDuration = 1f; 
 
+    [Header("Filtering")]
+    [SerializeField] private bool _ignoreTriggers = true;
+
     private readonly HashSet<Collider2D> _targetsInRange = new();
 
     public event Action<IDamageable, DamageInfo> DamageDealt;
 
-    void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        _targetsInRange.Add(other);
+        if (other == null)
+            return;
+
+        if (_ignoreTriggers && other.isTrigger)
+            return;
+
+        if (DamageableResolver.Find(other.transform) != null)
+        {
+            _targetsInRange.Add(other);
+        }
     }
 
-    void OnTriggerExit2D(Collider2D other)
+    private void OnTriggerExit2D(Collider2D other)
     {
+        if (other == null)
+            return;
+
         _targetsInRange.Remove(other);
     }
 
-
-    public bool Attack(Transform target, Vector2 attackOrigin)
+    public bool CanHit(Transform target)
     {
         if (target == null)
             return false;
 
-        if (!IsTargetInRange(target))
+        _targetsInRange.RemoveWhere(c => c == null);
+
+        foreach (Collider2D collider in _targetsInRange)
+        {
+            if (collider.transform == target ||
+                collider.transform.IsChildOf(target))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool Attack(Transform target, Vector2 attackOrigin)
+    {
+        if (!CanHit(target))
             return false;
 
         IDamageable damageable = DamageableResolver.Find(target);
-
         if (damageable == null)
             return false;
 
@@ -47,30 +76,9 @@ public class MeleeWeapon : MonoBehaviour
         );
 
         damageable.TakeDamage(damageInfo);
-
         DamageDealt?.Invoke(damageable, damageInfo);
 
         return true;
-    }
-
-    private bool IsTargetInRange(Transform target)
-    {
-        if (target == null)
-            return false;
-
-        foreach (Collider2D collider in _targetsInRange)
-        {
-            if (collider == null)
-                continue;
-
-            if (collider.transform == target ||
-                collider.transform.IsChildOf(target))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void OnValidate()
