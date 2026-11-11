@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyTarget))]
 public class EnemyBrain : MonoBehaviour
 {
-    [Header("For Animation")]
+    [Header("For Animation Must Be >= Animation")]
     [SerializeField] private float _attackFallbackTimeout = 2f;
     [SerializeField] private float _getDamageFallbackTimeout = 1f;
 
