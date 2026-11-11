@@ -21,18 +21,30 @@ public class EnemyAnimation : MonoBehaviour
     private int _getDamageTriggerHash;
     private int _dieTriggerHash;
 
+    private bool _isInitialized;
+
     private void Awake()
     {
+        EnsureInitialized(); 
+    }
+
+    private void EnsureInitialized()
+    {
+        if (_isInitialized)
+            return;
         _animator = GetComponent<Animator>();
 
         _speedParameterHash = Animator.StringToHash(_speedParameter);
         _attackTriggerHash = Animator.StringToHash(_attackTrigger);
         _getDamageTriggerHash = Animator.StringToHash(_getDamageTrigger);
         _dieTriggerHash = Animator.StringToHash(_dieTrigger);
+
+        _isInitialized = true;
     }
 
     public void PlayMoveAnimation(bool isMoving)
     {
+        EnsureInitialized();
         _animator.SetFloat(_speedParameterHash, isMoving ? 1f : 0f);
     }
 

@@ -37,4 +37,9 @@ public class EnemyStateMachine
         CurrentState.Exit();
         CurrentState.Enter();
     }
+    public void Reset()
+    {
+        CurrentState?.Exit();
+        CurrentState = null;
+    }
 }

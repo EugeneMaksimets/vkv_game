@@ -17,6 +17,7 @@ public class EnemyBrain : MonoBehaviour
 
     private EnemyStateMachine _stateMachine;
     private EnemyStateFactory _stateFactory;
+    private bool _hasStarted;
 
     private void Awake()
     {
@@ -38,11 +39,6 @@ public class EnemyBrain : MonoBehaviour
 
     }
 
-    private void Start()
-    {
-        InitializeStateMachine();
-    }
-
     private void OnEnable()
     {
         _health.Damaged += OnDamaged;
@@ -50,6 +46,11 @@ public class EnemyBrain : MonoBehaviour
 
         _stateFactory.AttackState.AttackCompleted += OnAttackCompleted;
         _stateFactory.DamagedState.DamageStateCompleted += OnDamageStateCompleted;
+
+        if (_hasStarted && _stateMachine.CurrentState == null)
+        {
+            _stateMachine.Initialize(_stateFactory.IdleState);
+        }
     }
 
     private void OnDisable()
@@ -59,6 +60,17 @@ public class EnemyBrain : MonoBehaviour
 
         _stateFactory.AttackState.AttackCompleted -= OnAttackCompleted;
         _stateFactory.DamagedState.DamageStateCompleted -= OnDamageStateCompleted;
+
+        _stateMachine.Reset();
+    }
+
+    private void Start()
+    {
+        _hasStarted = true;
+        if (_stateMachine.CurrentState == null)
+        {
+            _stateMachine.Initialize(_stateFactory.IdleState);
+        }
     }
 
     private void Update()
@@ -76,11 +88,6 @@ public class EnemyBrain : MonoBehaviour
         {
             EvaluateNextState();
         }
-    }
-
-    private void InitializeStateMachine()
-    {
-        _stateMachine.Initialize(_stateFactory.IdleState);
     }
 
     private void OnAttackCompleted()

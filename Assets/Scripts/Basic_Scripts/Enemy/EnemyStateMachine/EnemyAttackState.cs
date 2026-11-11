@@ -38,6 +38,8 @@ public class EnemyAttackState : IEnemyState
         _animation.AttackHit += OnAttackHit;
         _animation.AttackFinished += OnAttackFinished;
 
+        _enemy.StartAttackCooldown();
+
         _movement.Stop();
         _movement.FaceTarget(_target.TargetTransform);
 
@@ -77,6 +79,11 @@ public class EnemyAttackState : IEnemyState
     {
         if (_attackCompleted)
             return;
+        
+        if (!_damageAttempted)
+        {
+            Debug.LogWarning($"{nameof(EnemyAttackState)}: Animation finished without triggering AttackHit event.");
+        }
 
         _attackCompleted = true;
         AttackCompleted?.Invoke();

@@ -36,9 +36,9 @@ public class EnemyMelee : Enemy
         if (Health.IsDead)
             return;
 
-        _nextAttackTime = Time.time + _attackCooldown;
-
         Transform targetTransform = Target.TargetTransform;
+        if (targetTransform == null)
+            return;
 
         bool attackSucceeded = _meleeWeapon.Attack(
             targetTransform,
@@ -61,6 +61,11 @@ public class EnemyMelee : Enemy
         return !Health.IsDead
                && IsTargetInRange()
                && Time.time >= _nextAttackTime;
+    }
+
+    public override void StartAttackCooldown()
+    {
+        _nextAttackTime = Time.time + _attackCooldown;
     }
 
     private void OnValidate()
