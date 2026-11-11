@@ -21,11 +21,20 @@ public class EnemyMovement : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private float _direction;
     private Vector3 _originalScale;
+    private const float FacingDeadzone = 0.15f;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
         _originalScale = transform.localScale;
+    }
+
+    private void FixedUpdate()
+    {
+        _rigidbody.linearVelocity = new Vector2(
+            _direction * _moveSpeed,
+            _rigidbody.linearVelocity.y
+        );
     }
 
     public void MoveTowards(Transform target)
@@ -36,7 +45,14 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
 
-        SetDirection(Mathf.Sign(target.position.x - transform.position.x));
+        float deltaX = GetDeltaX(target);
+        if(Mathf.Abs(deltaX) <= FacingDeadzone)
+        {
+            Stop();
+            return;
+        }
+
+        SetDirection(Mathf.Sign(deltaX));
     }
 
     public void SetDirection(float direction)
@@ -57,26 +73,22 @@ public class EnemyMovement : MonoBehaviour
         if (target == null)
             return;
 
-        float directionX = target.position.x - transform.position.x;
-
-        if (Mathf.Abs(directionX) > 0.01f)
+        float deltaX = GetDeltaX(target);
+        if (Mathf.Abs(deltaX) > FacingDeadzone)
         {
-            UpdateFacingDirection(directionX);
+            UpdateFacingDirection(deltaX);
         }
-    }
-
-    private void FixedUpdate()
-    {
-        _rigidbody.linearVelocity = new Vector2(
-            _direction * _moveSpeed,
-            _rigidbody.linearVelocity.y
-        );
     }
 
     private void UpdateFacingDirection(float dir)
     {
         float scaleX = Mathf.Abs(_originalScale.x) * Mathf.Sign(dir);
         transform.localScale = new Vector3(scaleX, _originalScale.y, _originalScale.z);
+    }
+
+    private float GetDeltaX(Transform target)
+    {
+        return target.position.x - transform.position.x;
     }
 
     private void OnValidate()
