@@ -1,9 +1,10 @@
-
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 public class PlayerAnimation : MonoBehaviour
 {
+    public event Action InteractionAnimationFinished;
     private static readonly int IsGroundedHash =
         Animator.StringToHash("IsGrounded");
 
@@ -73,5 +74,10 @@ public class PlayerAnimation : MonoBehaviour
     public void PlayDie()
     {
         _animator.SetTrigger(DieHash);
+    }
+
+    public void OnInteractionAnimationFinished()
+    {
+        InteractionAnimationFinished?.Invoke();
     }
 }

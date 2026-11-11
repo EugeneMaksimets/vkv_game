@@ -1,55 +1,36 @@
-
 using UnityEngine;
 
 public class PlayerGetDamageState : IPlayerState
 {
-    private readonly PlayerBrain _playerBrain;
     private readonly PlayerMovement _playerMovement;
     private readonly PlayerAnimation _playerAnimation;
-    private readonly PlayerHealth _playerHealth;
 
-    private float _timer;
+    private DamageInfo _damageInfo;
 
-    public PlayerGetDamageState(
-        PlayerBrain playerBrain,
-        PlayerMovement playerMovement,
-        PlayerAnimation playerAnimation,
-        PlayerHealth playerHealth
-        )
+    public PlayerGetDamageState(PlayerMovement movement, PlayerAnimation animation)
     {
-        _playerBrain = playerBrain;
-        _playerMovement = playerMovement;
-        _playerAnimation = playerAnimation;
-        _playerHealth = playerHealth;
+        _playerMovement = movement;
+        _playerAnimation = animation;
+    }
+
+    public void SetDamageInfo(DamageInfo damageInfo)
+    {
+        _damageInfo = damageInfo;
     }
 
     public void Enter()
     {
-        _timer = 0f;
-
         _playerMovement.StopHorizontalMovement();
 
-        _playerBrain.ApplyHitKnockback(
-            _playerBrain.LastDamageInfo
+        _playerMovement.ApplyHitKnockback(
+            _damageInfo,
+            _damageInfo.KnockbackDuration
         );
 
         _playerAnimation.PlayGetDamage();
     }
 
-    public void UpdateState()
-    {
-        if (_playerHealth.IsDead)
-            return;
-
-        _timer += Time.deltaTime;
-
-        if (_timer >= _playerBrain.GetDamageDuration)
-        {
-            _playerBrain.StateMachine.ChangeState(
-                _playerBrain.IdleState
-            );
-        }
-    }
+    public void UpdateState() { }
 
     public void Exit() { }
 }

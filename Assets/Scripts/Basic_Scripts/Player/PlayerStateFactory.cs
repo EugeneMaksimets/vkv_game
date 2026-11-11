@@ -1,11 +1,8 @@
 public class PlayerStateFactory
 {
-    private readonly PlayerBrain _playerBrain;
     private readonly PlayerMovement _playerMovement;
     private readonly PlayerAnimation _playerAnimation;
     private readonly PlayerInteraction _playerInteraction;
-    private readonly PlayerHealth _playerHealth;
-    private readonly float _attackDuration;
 
     public PlayerIdleState IdleState { get; private set; }
     public PlayerRunState RunState { get; private set; }
@@ -17,19 +14,14 @@ public class PlayerStateFactory
     public PlayerDieState DieState { get; private set; }
 
     public PlayerStateFactory(
-        PlayerBrain playerBrain,
         PlayerMovement playerMovement,
         PlayerAnimation playerAnimation,
-        PlayerInteraction playerInteraction,
-        PlayerHealth playerHealth,
-        float attackDuration)
+        PlayerInteraction playerInteraction
+        )
     {
-        _playerBrain = playerBrain;
         _playerMovement = playerMovement;
         _playerAnimation = playerAnimation;
         _playerInteraction = playerInteraction;
-        _playerHealth = playerHealth;
-        _attackDuration = attackDuration;
     }
 
     public void CreateStates()
@@ -42,9 +34,9 @@ public class PlayerStateFactory
             _playerAnimation);
 
         CrouchState = new PlayerCrouchState(_playerMovement, _playerAnimation);
-        AttackState = new PlayerAttackState(_playerBrain, _playerMovement, _playerAnimation, _attackDuration);
-        InteractState = new PlayerInteractState(_playerBrain, _playerInteraction, _playerAnimation);
-        GetDamageState = new PlayerGetDamageState(_playerBrain, _playerMovement, _playerAnimation, _playerHealth);
+        AttackState = new PlayerAttackState(_playerMovement, _playerAnimation);
+        InteractState = new PlayerInteractState(_playerInteraction, _playerAnimation);
+        GetDamageState = new PlayerGetDamageState(_playerMovement, _playerAnimation);
         DieState = new PlayerDieState(_playerMovement, _playerAnimation);
     }
 }

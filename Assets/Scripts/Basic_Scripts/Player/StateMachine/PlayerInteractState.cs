@@ -1,20 +1,13 @@
-using System;
-
 public class PlayerInteractState : IPlayerState
 {
-    private readonly PlayerBrain _playerBrain;
     private readonly PlayerInteraction _playerInteraction;
     private readonly PlayerAnimation _playerAnimation;
     private const string TagPickUpItem = "pick_up_item";
 
-    public PlayerInteractState(
-        PlayerBrain playerBrain,
-        PlayerInteraction playerInteraction,
-        PlayerAnimation playerAnimation)
+    public PlayerInteractState(PlayerInteraction interaction, PlayerAnimation animation)
     {
-        _playerBrain = playerBrain;
-        _playerInteraction = playerInteraction;
-        _playerAnimation = playerAnimation;
+        _playerInteraction = interaction;
+        _playerAnimation = animation;
     }
 
     public void Enter()
@@ -30,11 +23,6 @@ public class PlayerInteractState : IPlayerState
 
             interactable.Interact();
         }
-
-        // TODO: Пересмотреть переход после анимации.
-        _playerBrain.StateMachine.ChangeState(
-            _playerBrain.IdleState
-        );
     }
 
     public void UpdateState() { }

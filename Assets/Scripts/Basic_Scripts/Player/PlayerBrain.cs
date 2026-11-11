@@ -11,6 +11,8 @@ public class PlayerBrain : MonoBehaviour
     [SerializeField, Min(0.01f)]
     private float _attackDuration = 0.5f;
 
+    private float _attackTimer;
+
     [Header("Components")]
     public PlayerAnimation Animation { get; private set; }
     public PlayerInteraction Interaction { get; private set; }
@@ -42,6 +44,8 @@ public class PlayerBrain : MonoBehaviour
     public PlayerGetDamageState GetDamageState { get; private set; }
     public PlayerDieState DieState { get; private set; }
 
+    private float _getDamageTimer;
+
     public bool IsControlLocked
     {
         get
@@ -65,7 +69,7 @@ public class PlayerBrain : MonoBehaviour
 
         StateMachine = new PlayerStateMachine();
 
-        StateFactory = new PlayerStateFactory(this, Movement, Animation, Interaction, Health, _attackDuration);
+        StateFactory = new PlayerStateFactory(Movement, Animation, Interaction);
         StateFactory.CreateStates();
 
         IdleState = StateFactory.IdleState;
@@ -83,6 +87,8 @@ public class PlayerBrain : MonoBehaviour
         Health.Damaged += HandleDamaged;
         Health.Died += HandleDied;
         Health.Revived += HandleRevived;
+
+        Animation.InteractionAnimationFinished += HandleInteractionAnimationFinished;
     }
 
     private void OnDisable()
@@ -90,6 +96,8 @@ public class PlayerBrain : MonoBehaviour
         Health.Damaged -= HandleDamaged;
         Health.Died -= HandleDied;
         Health.Revived -= HandleRevived;
+
+        Animation.InteractionAnimationFinished -= HandleInteractionAnimationFinished;
     }
 
     private void Start()
@@ -104,6 +112,8 @@ public class PlayerBrain : MonoBehaviour
         Animation.SetGrounded(IsGrounded);
 
         HandleMovementStateTransition();
+        HandleAttackStateTransition();
+        HandleGetDamageStateTransition();
 
         StateMachine.Update();
 
@@ -227,6 +237,7 @@ public class PlayerBrain : MonoBehaviour
             return;
         }
 
+        _attackTimer = 0f;
         StateMachine.ChangeState(AttackState);
     }
 
@@ -251,11 +262,47 @@ public class PlayerBrain : MonoBehaviour
 
     #endregion
 
+
+    private void HandleAttackStateTransition()
+    {
+        if (StateMachine.CurrentState != AttackState)
+            return;
+
+        _attackTimer += Time.deltaTime;
+
+        if (_attackTimer < _attackDuration)
+            return;
+
+        if (Movement.HorizontalInput != 0f)
+            StateMachine.ChangeState(RunState);
+        else
+            StateMachine.ChangeState(IdleState);
+    }
+
+    private void HandleInteractionAnimationFinished()
+    {
+        if (StateMachine.CurrentState != InteractState)
+            return;
+
+        StateMachine.ChangeState(IdleState);
+    }
+
     #region Damage
 
-    public void ApplyHitKnockback(DamageInfo damageInfo)
+    private void HandleGetDamageStateTransition()
     {
-        Movement.ApplyHitKnockback(damageInfo, _getDamageDuration);
+        if (StateMachine.CurrentState != GetDamageState)
+            return;
+
+        if (Health.IsDead)
+            return;
+
+        _getDamageTimer += Time.deltaTime;
+
+        if (_getDamageTimer >= _getDamageDuration)
+        {
+            StateMachine.ChangeState(IdleState);
+        }
     }
 
     private void HandleDamaged(
@@ -264,12 +311,17 @@ public class PlayerBrain : MonoBehaviour
     {
         LastDamageInfo = damageInfo;
 
-        if (health.CurrentHealth > 0f)
-        {
-            StopMoving();
-            Movement.SetCrouching(false);
-            StateMachine.ChangeState(GetDamageState);
-        }
+        if (health.CurrentHealth <= 0f)
+            return;
+
+        StopMoving();
+        Movement.SetCrouching(false);
+
+        _getDamageTimer = 0f;
+
+        GetDamageState.SetDamageInfo(damageInfo);
+
+        StateMachine.ChangeState(GetDamageState);
     }
 
     private void HandleDied(PlayerHealth health)

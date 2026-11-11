@@ -8,8 +8,8 @@ public class MeleeWeapon : MonoBehaviour
     [SerializeField] private float _damageAmount = 1f;
 
     [Header("Knockback")]
-    [SerializeField] private float _knockbackSpeed = 8f;
-    [SerializeField] private float _knockbackDuration = 10f; 
+    [SerializeField] private float _knockbackSpeed = 3f;
+    [SerializeField] private float _knockbackDuration = 1f; 
 
     private readonly HashSet<Collider2D> _targetsInRange = new();
 
