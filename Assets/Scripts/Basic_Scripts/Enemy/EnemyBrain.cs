@@ -85,7 +85,7 @@ public class EnemyBrain : MonoBehaviour
 
     private void OnAttackCompleted()
     {
-            if (_health.IsDead)
+        if (_health.IsDead)
         {
             ChangeState(_stateFactory.DieState);
             return;
