@@ -4,63 +4,39 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class EnemyAnimation : MonoBehaviour
 {
-    [Header("Animator Parameters")]
-    [SerializeField] private string _speedParameter = "Speed";
-    [SerializeField] private string _attackTrigger = "Attack";
-    [SerializeField] private string _getDamageTrigger = "GetDamage";
-    [SerializeField] private string _dieTrigger = "Die";
+    private static readonly int SpeedParameterHash = Animator.StringToHash("Speed");
+    private static readonly int AttackTriggerHash = Animator.StringToHash("Attack");
+    private static readonly int GetDamageTriggerHash = Animator.StringToHash("GetDamage");
+    private static readonly int DieTriggerHash = Animator.StringToHash("Die");
+    private Animator _animator;
 
     public event Action AttackHit;
     public event Action AttackFinished;
     public event Action GetDamageFinished;
 
-    private Animator _animator;
-
-    private int _speedParameterHash;
-    private int _attackTriggerHash;
-    private int _getDamageTriggerHash;
-    private int _dieTriggerHash;
-
-    private bool _isInitialized;
-
     private void Awake()
     {
-        EnsureInitialized(); 
-    }
-
-    private void EnsureInitialized()
-    {
-        if (_isInitialized)
-            return;
         _animator = GetComponent<Animator>();
-
-        _speedParameterHash = Animator.StringToHash(_speedParameter);
-        _attackTriggerHash = Animator.StringToHash(_attackTrigger);
-        _getDamageTriggerHash = Animator.StringToHash(_getDamageTrigger);
-        _dieTriggerHash = Animator.StringToHash(_dieTrigger);
-
-        _isInitialized = true;
     }
 
     public void PlayMoveAnimation(bool isMoving)
     {
-        EnsureInitialized();
-        _animator.SetFloat(_speedParameterHash, isMoving ? 1f : 0f);
+        _animator.SetFloat(SpeedParameterHash, isMoving ? 1f : 0f);
     }
 
     public void PlayAttackAnimation()
     {
-        _animator.SetTrigger(_attackTriggerHash);
+        _animator.SetTrigger(AttackTriggerHash);
     }
 
     public void PlayGetDamageAnimation()
     {
-        _animator.SetTrigger(_getDamageTriggerHash);
+        _animator.SetTrigger(GetDamageTriggerHash);
     }
 
     public void PlayDieAnimation()
     {
-        _animator.SetTrigger(_dieTriggerHash);
+        _animator.SetTrigger(DieTriggerHash);
     }
 
     public void OnAttackHit()
