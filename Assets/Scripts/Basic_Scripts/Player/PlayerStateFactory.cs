@@ -3,6 +3,7 @@ public class PlayerStateFactory
     private readonly PlayerMovement _playerMovement;
     private readonly PlayerAnimation _playerAnimation;
     private readonly PlayerInteraction _playerInteraction;
+    private readonly float _duration;
 
     public PlayerIdleState IdleState { get; private set; }
     public PlayerRunState RunState { get; private set; }
@@ -16,12 +17,14 @@ public class PlayerStateFactory
     public PlayerStateFactory(
         PlayerMovement playerMovement,
         PlayerAnimation playerAnimation,
-        PlayerInteraction playerInteraction
+        PlayerInteraction playerInteraction,
+        float duration
         )
     {
         _playerMovement = playerMovement;
         _playerAnimation = playerAnimation;
         _playerInteraction = playerInteraction;
+        _duration = duration;
     }
 
     public void CreateStates()
@@ -34,9 +37,9 @@ public class PlayerStateFactory
             _playerAnimation);
 
         CrouchState = new PlayerCrouchState(_playerMovement, _playerAnimation);
-        AttackState = new PlayerAttackState(_playerMovement, _playerAnimation);
-        InteractState = new PlayerInteractState(_playerInteraction, _playerAnimation);
-        GetDamageState = new PlayerGetDamageState(_playerMovement, _playerAnimation);
+        AttackState = new PlayerAttackState(_playerMovement, _playerAnimation, _duration);
+        InteractState = new PlayerInteractState(_playerInteraction, _playerAnimation, _duration);
+        GetDamageState = new PlayerGetDamageState(_playerMovement, _playerAnimation, _duration);
         DieState = new PlayerDieState(_playerMovement, _playerAnimation);
     }
 }

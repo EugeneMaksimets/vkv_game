@@ -21,4 +21,19 @@ public class PlayerStateMachine {
     {
         CurrentState?.UpdateState();
     }
+
+    public void RestartCurrentState()
+    {
+        if (CurrentState == null)
+            return;
+
+        CurrentState.Exit();
+        CurrentState.Enter();
+    }
+
+    public void Reset()
+    {
+        CurrentState?.Exit();
+        CurrentState = null;
+    }
 }
