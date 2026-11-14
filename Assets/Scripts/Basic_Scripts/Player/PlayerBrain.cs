@@ -7,11 +7,12 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerBrain : MonoBehaviour
 {
-    [Header("Attack")]
+    // Duration => animation in sec
+    [Header("Duration for fallback anim")]
     [SerializeField, Min(0.01f)]
-    private float _attackDuration = 0.5f;
-
+    private float _duration = 1f;
     private float _attackTimer;
+    private float _getDamageTimer;
 
     [Header("Components")]
     public PlayerAnimation Animation { get; private set; }
@@ -44,8 +45,6 @@ public class PlayerBrain : MonoBehaviour
     public PlayerGetDamageState GetDamageState { get; private set; }
     public PlayerDieState DieState { get; private set; }
 
-    private float _getDamageTimer;
-
     public bool IsControlLocked
     {
         get
@@ -69,7 +68,7 @@ public class PlayerBrain : MonoBehaviour
 
         StateMachine = new PlayerStateMachine();
 
-        StateFactory = new PlayerStateFactory(Movement, Animation, Interaction);
+        StateFactory = new PlayerStateFactory(Movement, Animation, Interaction, _duration);
         StateFactory.CreateStates();
 
         IdleState = StateFactory.IdleState;
@@ -270,7 +269,7 @@ public class PlayerBrain : MonoBehaviour
 
         _attackTimer += Time.deltaTime;
 
-        if (_attackTimer < _attackDuration)
+        if (_attackTimer < _duration)
             return;
 
         if (Movement.HorizontalInput != 0f)

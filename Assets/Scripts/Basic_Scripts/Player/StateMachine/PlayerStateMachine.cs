@@ -21,4 +21,10 @@ public class PlayerStateMachine {
     {
         CurrentState?.UpdateState();
     }
+
+    public void Reset()
+    {
+        CurrentState?.Exit();
+        CurrentState = null;
+    }
 }

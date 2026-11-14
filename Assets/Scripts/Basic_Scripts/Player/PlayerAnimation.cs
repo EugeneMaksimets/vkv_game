@@ -4,80 +4,50 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class PlayerAnimation : MonoBehaviour
 {
-    public event Action InteractionAnimationFinished;
-    private static readonly int IsGroundedHash =
-        Animator.StringToHash("IsGrounded");
-
-    private static readonly int SpeedHash =
-        Animator.StringToHash("Speed");
-
-    private static readonly int IsCrouchingHash =
-        Animator.StringToHash("IsCrouching");
-
-    private static readonly int JumpHash =
-        Animator.StringToHash("Jump");
-
-    private static readonly int AttackHash =
-        Animator.StringToHash("Attack");
-
-    private static readonly int PickUpItemHash =
-        Animator.StringToHash("PickUpItem");
-
-    private static readonly int GetDamageHash =
-        Animator.StringToHash("GetDamage");
-
-    private static readonly int DieHash =
-        Animator.StringToHash("Die");
-
+    private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
+    private static readonly int IsCrouchingHash = Animator.StringToHash("IsCrouching");
+    private static readonly int JumpHash = Animator.StringToHash("Jump");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+    private static readonly int PickUpItemHash = Animator.StringToHash("PickUpItem");
+    private static readonly int GetDamageHash = Animator.StringToHash("GetDamage");
+    private static readonly int DieHash = Animator.StringToHash("Die");
     private Animator _animator;
+    public event Action InteractionAnimationFinished;
+    public event Action AttackAnimationFinished;
+    public event Action GetDamageAnimationFinished;
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
     }
 
-    public void SetGrounded(bool isGrounded)
-    {
+    public void SetGrounded(bool isGrounded) => 
         _animator.SetBool(IsGroundedHash, isGrounded);
-    }
-
-    public void SetSpeed(float speed)
-    {
+    
+    public void SetSpeed(float speed) =>
         _animator.SetFloat(SpeedHash, speed);
-    }
 
-    public void SetCrouching(bool isCrouching)
-    {
+    public void SetCrouching(bool isCrouching) =>
         _animator.SetBool(IsCrouchingHash, isCrouching);
-    }
 
-    public void PlayJump()
-    {
+    public void PlayJump() =>
         _animator.SetTrigger(JumpHash);
-    }
 
-    public void PlayAttack()
-    {
+    public void PlayAttack() =>
         _animator.SetTrigger(AttackHash);
-    }
 
-    public void PlayPickUpItem()
-    {
+    public void PlayPickUpItem() =>
         _animator.SetTrigger(PickUpItemHash);
-    }
 
-    public void PlayGetDamage()
-    {
+    public void PlayGetDamage() =>
         _animator.SetTrigger(GetDamageHash);
-    }
 
-    public void PlayDie()
-    {
+    public void PlayDie() =>
         _animator.SetTrigger(DieHash);
-    }
 
-    public void OnInteractionAnimationFinished()
-    {
-        InteractionAnimationFinished?.Invoke();
-    }
+    // Invoke from Animation Events 
+    public void OnInteractionAnimationFinished() => InteractionAnimationFinished?.Invoke();
+    public void OnAttackAnimationFinished() => AttackAnimationFinished?.Invoke();
+    public void OnGetDamageAnimationFinished() => GetDamageAnimationFinished?.Invoke();
 }
