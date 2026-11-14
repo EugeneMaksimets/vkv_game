@@ -38,7 +38,7 @@ public class PlayerStateFactory
 
         CrouchState = new PlayerCrouchState(_playerMovement, _playerAnimation);
         AttackState = new PlayerAttackState(_playerMovement, _playerAnimation, _duration);
-        InteractState = new PlayerInteractState(_playerInteraction, _playerAnimation);
+        InteractState = new PlayerInteractState(_playerInteraction, _playerAnimation, _duration);
         GetDamageState = new PlayerGetDamageState(_playerMovement, _playerAnimation, _duration);
         DieState = new PlayerDieState(_playerMovement, _playerAnimation);
     }
