@@ -14,43 +14,24 @@ public class EnemyAnimation : MonoBehaviour
     public event Action AttackFinished;
     public event Action GetDamageFinished;
 
-    private void Awake()
-    {
+    private void Awake() =>
         _animator = GetComponent<Animator>();
-    }
 
-    public void PlayMoveAnimation(bool isMoving)
-    {
+    public void PlayMoveAnimation(bool isMoving) =>
         _animator.SetFloat(SpeedParameterHash, isMoving ? 1f : 0f);
-    }
 
-    public void PlayAttackAnimation()
-    {
+    public void PlayAttackAnimation() =>
         _animator.SetTrigger(AttackTriggerHash);
-    }
-
-    public void PlayGetDamageAnimation()
-    {
+        
+    public void PlayGetDamageAnimation() =>
         _animator.SetTrigger(GetDamageTriggerHash);
-    }
 
-    public void PlayDieAnimation()
-    {
+    public void PlayDieAnimation() =>
         _animator.SetTrigger(DieTriggerHash);
-    }
 
-    public void OnAttackHit()
-    {
-        AttackHit?.Invoke();
-    }
+    public void OnAttackHit() => AttackHit?.Invoke();
 
-    public void OnAttackFinished()
-    {
-        AttackFinished?.Invoke();
-    }
+    public void OnAttackFinished() => AttackFinished?.Invoke();
 
-        public void OnGetDamageFinished()
-    {
-        GetDamageFinished?.Invoke();
-    }
+    public void OnGetDamageFinished() => GetDamageFinished?.Invoke();
 }
